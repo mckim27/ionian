@@ -10,9 +10,11 @@ from bs4 import BeautifulSoup
 from collect.collector import Collector
 from exception.custom_exception import CollectorException
 from config.constant import ERROR_UNEXPECTED_EXIT_CODE
-
+from store.news_obj import NewsInfo
 
 class DaumNewsCollector(Collector):
+
+    __new_info_list = None
 
     def __init__(self):
         self.BASE_URL = 'https://media.daum.net'
@@ -32,6 +34,8 @@ class DaumNewsCollector(Collector):
             'breakingnews/sports',
             'breakingnews/digital'
         ]
+
+        self.__new_info_list = []
 
     # override.
     def collect(self):
@@ -60,10 +64,15 @@ class DaumNewsCollector(Collector):
                         log.debug('waiting...')
                         time.sleep(2)
 
-                        self.__get_newslist(sub_cate_url, req_page, self.TARGET_DATE)
+                        news_list_part = self.__get_newslist(sub_cate_url, req_page, self.TARGET_DATE)
+                        # log.debug(news_list_part)
+
+                        self.__new_info_list += news_list_part
                         req_page += 1
 
                 # TODO 추후 break 삭제
+
+                print(len(self.__new_info_list))
                 break
         except Exception as e:
             raise CollectorException('Collector Exception : {}'.format(e), ERROR_UNEXPECTED_EXIT_CODE)
@@ -113,23 +122,36 @@ class DaumNewsCollector(Collector):
 
         # target : ul class list_news2 list_allnews
         news_list_obj = soup.find('ul', class_='list_allnews')
+
+        news_info_list = []
+
         for el in news_list_obj:
+
             if type(el) is not bs4.element.NavigableString:
                 # print(el)
+                news_info = NewsInfo()
 
                 new_title = el.find('a', class_='link_txt').get_text()
-                log.debug(new_title)
+                # log.debug(new_title)
+                news_info.set_title(new_title)
 
                 news_url = el.find('a', class_='link_txt').get('href')
-                log.debug(news_url)
+                # log.debug(news_url)
+                news_info.set_link_url(news_url)
 
-                news_info = el.find('span', class_='info_news').get_text().replace(' ', '').split('·')
+                news_info_el = el.find('span', class_='info_news').get_text().replace(' ', '').split('·')
 
-                press_name = news_info[0]
-                log.debug(press_name)
+                press_name = news_info_el[0]
+                # log.debug(press_name)
+                news_info.set_press_name(press_name)
 
-                publish_time = news_info[1]
-                log.debug(publish_time)
+                publish_date = self.TARGET_DATE + news_info_el[1].replace(':', '')
+                # log.debug(publish_date)
+                news_info.set_publish_date(publish_date)
+
+                news_info_list.append(news_info)
+
+        return news_info_list
 
     def __is_exist_page(self, target_url, req_page, reg_date):
         target_url += '?' + self.PAGE_PARAM_KEY + str(req_page) + '&' + self.DATE_PARAM_KEY + reg_date
