@@ -1,10 +1,16 @@
+#! /usr/bin/python
 # -*- coding: utf-8 -*-
+
 import requests
 import bs4
 import time
+from logzero import logger as log
 from utils.date_util import get_previous_day
 from bs4 import BeautifulSoup
 from collect.collector import Collector
+from exception.custom_exception import CollectorException
+from config.constant import ERROR_UNEXPECTED_EXIT_CODE
+
 
 class DaumNewsCollector(Collector):
 
@@ -26,40 +32,46 @@ class DaumNewsCollector(Collector):
             'breakingnews/sports',
             'breakingnews/digital'
         ]
+
     # override.
     def collect(self):
-        for tail_path in self.MAIN_CATE_TAIL_PATH:
-            target_url = self.BASE_URL + '/' + tail_path
+        try:
+            for tail_path in self.MAIN_CATE_TAIL_PATH:
+                target_url = self.BASE_URL + '/' + tail_path
 
-            sub_cate_urls = self.__get_sub_categorys(target_url)
+                sub_cate_urls = self.__get_sub_categories(target_url)
 
-            # 하위 카테고리 없는 경우의 처리.
-            if len(sub_cate_urls) is 0:
-                sub_cate_urls.append(target_url)
+                # 하위 카테고리 없는 경우의 처리.
+                if len(sub_cate_urls) is 0:
+                    sub_cate_urls.append(target_url)
 
-            print('### sub_cate_urls ###')
-            print('\n'.join(sub_cate_urls))
+                log.debug('### sub_cate_urls ###')
+                log.debug('\n'.join(sub_cate_urls))
 
-            for sub_cate_url in sub_cate_urls:
-                req_page = 1
+                for sub_cate_url in sub_cate_urls:
+                    req_page = 1
 
-                print('### sub_cate_url : ', sub_cate_url)
+                    log.debug('### sub_cate_url : {0}'.format(sub_cate_url))
 
-                while self.__isExistPage(sub_cate_url, req_page, self.TARGET_DATE):
-                    if req_page is 2 : break
+                    while self.__is_exist_page(sub_cate_url, req_page, self.TARGET_DATE):
+                        if req_page is 2 :
+                            break
 
-                    print('waiting...')
-                    time.sleep(2)
+                        log.debug('waiting...')
+                        time.sleep(2)
 
-                    self.__get_newslist(sub_cate_url, req_page, self.TARGET_DATE)
-                    req_page += 1
+                        self.__get_newslist(sub_cate_url, req_page, self.TARGET_DATE)
+                        req_page += 1
 
-            # TODO 추후 break 삭제
-            # break
+                # TODO 추후 break 삭제
+                break
+        except Exception as e:
+            raise CollectorException('Collector Exception : {}'.format(e), ERROR_UNEXPECTED_EXIT_CODE)
+
     def store(self):
         None
 
-    def __get_sub_categorys(self, cate_url):
+    def __get_sub_categories(self, cate_url):
         req = requests.get(cate_url)
         html = req.text
 
@@ -73,9 +85,9 @@ class DaumNewsCollector(Collector):
 
         sub_cate_urlpaths = []
 
-        #print('cate_url : ', cate_url)
+        # print('cate_url : ', cate_url)
 
-        if sub_cate_els != None:
+        if sub_cate_els is not None:
             for el in sub_cate_els:
                 if type(el) is not bs4.element.NavigableString:
                     sub_cate_tailpath = el.find('a', class_='link_txt').get('href')
@@ -89,7 +101,7 @@ class DaumNewsCollector(Collector):
         # ex) https://media.daum.net/breakingnews/society/affair?page=1&regDate=20190501
         # TODO news Object 만들어서 list 로 만들고 return 하도록 구현예정.
         target_url += '?' + self.PAGE_PARAM_KEY + str(req_page) + '&' + self.DATE_PARAM_KEY + reg_date
-        print('target_url : ', target_url)
+        log.debug('target_url : {0}'.format(target_url))
         req = requests.get(target_url)
         html = req.text
 
@@ -106,21 +118,20 @@ class DaumNewsCollector(Collector):
                 # print(el)
 
                 new_title = el.find('a', class_='link_txt').get_text()
-                print(new_title)
+                log.debug(new_title)
 
                 news_url = el.find('a', class_='link_txt').get('href')
-                print(news_url)
+                log.debug(news_url)
 
                 news_info = el.find('span', class_='info_news').get_text().replace(' ', '').split('·')
 
                 press_name = news_info[0]
-                print(press_name)
+                log.debug(press_name)
 
                 publish_time = news_info[1]
-                print(publish_time)
-                print()
+                log.debug(publish_time)
 
-    def __isExistPage(self, target_url, req_page, reg_date):
+    def __is_exist_page(self, target_url, req_page, reg_date):
         target_url += '?' + self.PAGE_PARAM_KEY + str(req_page) + '&' + self.DATE_PARAM_KEY + reg_date
         req = requests.get(target_url)
         is_ok = req.ok
