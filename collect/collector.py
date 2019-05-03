@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from abc import ABC, abstractmethod
 
-class Collector :
+class Collector(ABC) :
 
-    def collect(self, work_func):
-        self.__result = work_func()
+    @abstractmethod
+    def collect(self):
+        pass
 
-    def save_result(self):
-        None
+    @abstractmethod
+    def store(self):
+        pass
