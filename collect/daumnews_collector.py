@@ -28,34 +28,42 @@ class DaumNewsCollector(Collector):
         self.MAIN_CATE_INFO = [
             {
                 'category_name' : '사회',
+                'category_en_name': 'society',
                 'url_tail_path' : 'breakingnews/society'
             },
             {
                 'category_name': '정치',
+                'category_en_name': 'politics',
                 'url_tail_path': 'breakingnews/politics'
             },
             {
                 'category_name': '경제',
+                'category_en_name': 'economic',
                 'url_tail_path': 'breakingnews/economic'
             },
             {
                 'category_name': '국제',
+                'category_en_name': 'foreign',
                 'url_tail_path': 'breakingnews/foreign'
             },
             {
                 'category_name': '문화',
+                'category_en_name': 'culture',
                 'url_tail_path': 'breakingnews/culture'
             },
             {
                 'category_name': '연예',
+                'category_en_name': 'entertain',
                 'url_tail_path': 'breakingnews/entertain'
             },
             {
                 'category_name': '스포츠',
+                'category_en_name': 'sports',
                 'url_tail_path': 'breakingnews/sports'
             },
             {
                 'category_name': 'IT',
+                'category_en_name': 'digital',
                 'url_tail_path': 'breakingnews/digital'
             }
         ]
@@ -69,28 +77,33 @@ class DaumNewsCollector(Collector):
             for cate_info in self.MAIN_CATE_INFO:
                 target_url = self.BASE_URL + '/' + cate_info['url_tail_path']
 
-                sub_cate_urls = self.__get_sub_categories(target_url)
+                sub_cate_info_list = self.__get_sub_categories(target_url)
 
                 # 하위 카테고리 없는 경우의 처리.
-                if len(sub_cate_urls) is 0:
-                    sub_cate_urls.append(target_url)
+                if len(sub_cate_info_list) is 0:
+                    sub_cate_info_list.append({
+                        'url' : target_url,
+                        'sub_category_name': '-',
+                        'sub_category_en_name': '-'
+                    })
 
                 log.debug('### sub_cate_urls ###')
-                log.debug('\n'.join(sub_cate_urls))
+                log.debug(sub_cate_info_list)
 
-                for sub_cate_url in sub_cate_urls:
+                for sub_cate_info in sub_cate_info_list:
                     req_page = 1
 
-                    log.debug('### sub_cate_url : {0}'.format(sub_cate_url))
+                    log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
-                    while self.__is_exist_page(sub_cate_url, req_page, self.TARGET_DATE):
+                    while self.__is_exist_page(sub_cate_info['url'], req_page, self.TARGET_DATE):
                         # if req_page is 2 :
                         #     break
 
                         log.debug('waiting...')
                         time.sleep(2)
 
-                        news_list_part = self.__get_newslist(sub_cate_url, req_page, self.TARGET_DATE)
+                        news_list_part = self.__get_newslist(
+                            cate_info, sub_cate_info, req_page, self.TARGET_DATE)
 
                         if len(news_list_part) is 0 :
                             break
@@ -124,23 +137,30 @@ class DaumNewsCollector(Collector):
 
         sub_cate_els = soup.find('ul', class_='tab_sub2')
 
-        sub_cate_urlpaths = []
+        sub_cate_info_list = []
 
-        # print('cate_url : ', cate_url)
-
+        # sub category 가 없을수도 있음.
         if sub_cate_els is not None:
             for el in sub_cate_els:
                 if type(el) is not bs4.element.NavigableString:
                     sub_cate_tailpath = el.find('a', class_='link_txt').get('href')
 
+                    # 전체 기사 항목 건너뜀.
                     if cate_url != self.BASE_URL + sub_cate_tailpath:
-                        sub_cate_urlpaths.append(self.BASE_URL + sub_cate_tailpath)
+                        sub_cate_info = {}
 
-        return sub_cate_urlpaths
+                        sub_cate_name = el.find('a', class_='link_txt').get_text()
+                        sub_cate_info['url'] = self.BASE_URL + sub_cate_tailpath
+                        sub_cate_info['sub_category_name'] = sub_cate_name
+                        sub_cate_info['sub_category_en_name'] = sub_cate_tailpath[sub_cate_tailpath.rfind('/') + 1:]
+                        sub_cate_info_list.append(sub_cate_info)
 
-    def __get_newslist(self, target_url, req_page, reg_date):
+        return sub_cate_info_list
+
+    def __get_newslist(self, cate_info, sub_cate_info, req_page, reg_date):
         # ex) https://media.daum.net/breakingnews/society/affair?page=1&regDate=20190501
         # TODO news Object 만들어서 list 로 만들고 return 하도록 구현예정.
+        target_url = sub_cate_info['url']
         target_url += '?' + self.PAGE_PARAM_KEY + str(req_page) + '&' + self.DATE_PARAM_KEY + reg_date
         log.debug('target_url : {0}'.format(target_url))
         req = requests.get(target_url)
@@ -168,6 +188,10 @@ class DaumNewsCollector(Collector):
             if type(el) is not bs4.element.NavigableString:
                 # print(el)
                 news_info = {}
+                news_info['category_name'] = cate_info['category_name']
+                news_info['category_en_name'] = cate_info['category_en_name']
+                news_info['sub_category_name'] = sub_cate_info['sub_category_name']
+                news_info['sub_category_en_name'] = sub_cate_info['sub_category_en_name']
 
                 new_title = el.find('a', class_='link_txt').get_text()
                 # log.debug(new_title)

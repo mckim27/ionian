@@ -27,6 +27,10 @@ class Storer :
                         'url': news_info['url'],
                         'title': news_info['title'],
                         'press_name': news_info['press_name'],
+                        'category_name' : news_info['category_name'],
+                        'category_en_name': news_info['category_en_name'],
+                        'sub_category_name': news_info['sub_category_name'],
+                        'sub_category_en_name': news_info['sub_category_en_name'],
                         'create_date': datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
                     }
                 )
