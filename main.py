@@ -6,6 +6,7 @@ import traceback
 from exception.custom_exception import *
 from logzero import logger as log
 from collect.daumnews_collector import DaumNewsCollector
+from parse.daumnews_parser import DaumNewsParser
 from config.config_loader import ConfigLoader
 from config.constant import *
 
@@ -17,7 +18,7 @@ if __name__ == "__main__" :
                             help='input target news site. now only DAUM site is supported...')
 
         parser.add_argument('--role', type=str, nargs='?', default='collector',
-                            help='input some role. \'collector\' or \'parser\'')
+                            help='input some role. \'collector\' or \'parse\'')
 
         parser.add_argument('--env', type=str, nargs='?', default='dev',
                             help='input run env. \'dev\' or \'stg\' or \'prd\'')
@@ -42,11 +43,13 @@ if __name__ == "__main__" :
                 log.info('{0}-collector not implemented...'.format(target_site))
         else:
             if target_site == 'DAUM':
-                log.info('### parser start. target site : {0}'.format(target_site))
-                log.info('not implemented...')
+                log.info('### parse start. target site : {0}'.format(target_site))
+
+                parser = DaumNewsParser()
+                parser.waiting_and_parsing()
             else:
                 log.info('### input target site : {0}'.format(target_site))
-                log.info('{0}-parser not implemented...'.format(target_site))
+                log.info('{0}-parse not implemented...'.format(target_site))
 
     except CannotRunException as cre:
         log.error(traceback.format_exc())
