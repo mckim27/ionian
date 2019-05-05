@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import datetime
+import json
 import bs4
 import time
 from logzero import logger as log
@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
 from collect.collector import Collector
 from exception.custom_exception import CollectorException
 from config.constant import ERROR_UNEXPECTED_EXIT_CODE
-from store.storer import Storer
+from store.dynamo_storer import DynamoNewsMetaInfoStorer
+from store.kafka_producer import IonianKafkaProducer
 
 class DaumNewsCollector(Collector):
 
@@ -73,7 +74,8 @@ class DaumNewsCollector(Collector):
     # override.
     def collect(self):
         try:
-            storer = Storer()
+            #storer = DynamoNewsMetaInfoStorer()
+
             for cate_info in self.MAIN_CATE_INFO:
                 target_url = self.BASE_URL + '/' + cate_info['url_tail_path']
 
@@ -93,6 +95,8 @@ class DaumNewsCollector(Collector):
                 for sub_cate_info in sub_cate_info_list:
                     req_page = 1
 
+                    ionian_producer = IonianKafkaProducer()
+
                     log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
                     while self.__is_exist_page(sub_cate_info['url'], req_page, self.TARGET_DATE):
@@ -102,20 +106,33 @@ class DaumNewsCollector(Collector):
                         log.debug('waiting...')
                         time.sleep(2)
 
-                        news_list_part = self.__get_newslist(
+                        news_list = self.__get_newslist(
                             cate_info, sub_cate_info, req_page, self.TARGET_DATE)
 
-                        if len(news_list_part) is 0 :
+                        # 빈값이라면 마지막 페이지...
+                        if len(news_list) is 0 :
                             break
 
-                        storer.store_to_dynamo(news_list_part)
+                        for news in news_list:
+                            ionian_producer.publish_message(
+                                'news_meta_info',
+                                news['origin_create_date'],
+                                json.dumps(news)
+                            )
+
+                        # storer.store_to_dynamo(news_list_part)
 
                         # log.debug(news_list_part)
 
-                        self.__new_count += len(news_list_part)
+                        self.__new_count += len(news_list)
                         req_page += 1
 
-                # TODO 추후 break 삭제
+                        break
+
+                    ionian_producer.close()
+
+                    #####
+                    break
 
                 log.info('sub_cate_url end. current count : {0}'.format(self.__new_count))
 
@@ -132,6 +149,11 @@ class DaumNewsCollector(Collector):
         header = req.headers
         status = req.status_code
         is_ok = req.ok
+
+        if not is_ok:
+            raise Exception('request Exception...')
+
+        print(cate_url)
 
         soup = BeautifulSoup(html, 'html.parser')
 
@@ -180,6 +202,7 @@ class DaumNewsCollector(Collector):
 
         news_info_list = []
 
+        # 마지막 페이지일 경우 빈값 리턴.
         if type(news_list_obj) is type(None):
             return news_info_list
 
