@@ -60,8 +60,10 @@ class DaumNewsParser:
 
         # TODO summary_view 있는 경우 있음.
 
-
         text_container = news_view.find('div', id='harmonyContainer')
-        text = text_container.find('section')
-        log.debug(text)
+        # text = text_container.find_all('section')
+        re = text_container.find_all("p", attrs={"dmcf-ptype":True})
+        for text_block in re:
+            log.debug(text_block.get_text())
+
 
