@@ -13,6 +13,8 @@ from exception.custom_exception import CollectorException
 from config.constant import ERROR_UNEXPECTED_EXIT_CODE
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from store.kafka_producer import IonianKafkaProducer
+from parse.daumnews_parser import DaumNewsParser
+
 
 class DaumNewsCollector(Collector):
 
@@ -75,6 +77,7 @@ class DaumNewsCollector(Collector):
     def collect(self):
         try:
             #storer = DynamoNewsMetaInfoStorer()
+            parser = DaumNewsParser()
 
             for cate_info in self.MAIN_CATE_INFO:
                 target_url = self.BASE_URL + '/' + cate_info['url_tail_path']
@@ -114,11 +117,14 @@ class DaumNewsCollector(Collector):
                             break
 
                         for news in news_list:
-                            ionian_producer.publish_message(
-                                'news_meta_info',
-                                news['origin_create_date'],
-                                json.dumps(news)
-                            )
+                            ### for test
+                            parser.parse(news)
+
+                            # ionian_producer.publish_message(
+                            #     'news_meta_info',
+                            #     news['origin_create_date'],
+                            #     json.dumps(news)
+                            # )
 
                         # storer.store_to_dynamo(news_list_part)
 
@@ -217,11 +223,11 @@ class DaumNewsCollector(Collector):
                 news_info['sub_category_en_name'] = sub_cate_info['sub_category_en_name']
 
                 new_title = el.find('a', class_='link_txt').get_text()
-                # log.debug(new_title)
+                log.debug(new_title)
                 news_info['title'] = new_title
 
                 news_url = el.find('a', class_='link_txt').get('href')
-                # log.debug(news_url)
+                log.debug(news_url)
                 news_info['url'] = news_url
 
                 news_info_el = el.find('span', class_='info_news').get_text().replace(' ', '').split('·')
