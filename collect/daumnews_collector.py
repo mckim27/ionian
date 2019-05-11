@@ -103,9 +103,6 @@ class DaumNewsCollector(Collector):
                     log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
                     while self.__is_exist_page(sub_cate_info['url'], req_page, self.TARGET_DATE):
-                        # if req_page is 2 :
-                        #     break
-
                         log.debug('waiting...')
                         time.sleep(2)
 
@@ -117,14 +114,11 @@ class DaumNewsCollector(Collector):
                             break
 
                         for news in news_list:
-                            ### for test
-                            parser.parse(news)
-
-                            # ionian_producer.publish_message(
-                            #     'news_meta_info',
-                            #     news['origin_create_date'],
-                            #     json.dumps(news)
-                            # )
+                            ionian_producer.publish_message(
+                                'news_meta_info',
+                                news['origin_create_date'],
+                                json.dumps(news)
+                            )
 
                         # storer.store_to_dynamo(news_list_part)
 
@@ -133,12 +127,7 @@ class DaumNewsCollector(Collector):
                         self.__new_count += len(news_list)
                         req_page += 1
 
-                        break
-
                     ionian_producer.close()
-
-                    #####
-                    break
 
                 log.info('sub_cate_url end. current count : {0}'.format(self.__new_count))
 

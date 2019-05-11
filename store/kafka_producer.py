@@ -3,6 +3,7 @@
 
 from kafka import KafkaProducer
 from logzero import logger as log
+from config import constant
 
 
 class IonianKafkaProducer:
@@ -11,8 +12,9 @@ class IonianKafkaProducer:
 
     def __init__(self):
         try:
-            # TODO server host config 로...
-            self.__producer = KafkaProducer(bootstrap_servers=['localhost:9092'], api_version=(0, 10))
+            print(constant.CONFIG['kafka_brokers'])
+            self.__producer = KafkaProducer(
+                bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10))
         except Exception as ex:
             log.error('Exception while connecting Kafka')
             raise ex

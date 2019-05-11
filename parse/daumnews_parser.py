@@ -3,17 +3,14 @@
 
 import time
 import json
-import bs4
 from logzero import logger as log
 from kafka import KafkaConsumer
 import requests
 from bs4 import BeautifulSoup
+from config import constant
 
 
 class DaumNewsParser:
-
-    # TODO config 에 kafka consumer option 추가 및 적용...
-    __CONSUMER_WAITING_TERM_SECONDS = 2
 
     def stop(self):
         log.info('### Daum News Parser stopping ...')
@@ -24,18 +21,18 @@ class DaumNewsParser:
             while True:
                 consumer = KafkaConsumer(
                     'news_meta_info', auto_offset_reset='latest',
-                    bootstrap_servers=['localhost:9092'], api_version=(0, 10),
+                    bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
                     consumer_timeout_ms=5000, max_poll_records=10
                 )
+
                 for msg in consumer:
                     news_info = json.loads(msg.value)
                     print(news_info)
-
-                    # TODO parsing method 실행부.
+                    self.parse(news_info)
 
                 log.info('### Daum News Parser is waiting ...')
 
-                time.sleep(self.__CONSUMER_WAITING_TERM_SECONDS)
+                time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
 
         except KeyboardInterrupt:
             self.stop()
