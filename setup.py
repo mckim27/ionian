@@ -16,7 +16,7 @@ PY_YAML_MIN_VERSION = '5.1'
 LOG_ZERO_MIN_VERSION = '1.5'
 BS4_MIN_VERSION = '4.7'
 REQUESTS_MIN_VERSION = '2.21'
-
+KAFKA_PYTHON_MIN_VERSION = 1.4
 # This check and everything above must remain compatible with python 2.X.
 ##########################################################################
 #                               INFO                                     #
@@ -34,7 +34,8 @@ REQUIREMENTS = [
     'pyyaml>={0}'.format(PY_YAML_MIN_VERSION),
     'logzero>={0}'.format(LOG_ZERO_MIN_VERSION),
     'beautifulsoup4>={0}'.format(BS4_MIN_VERSION),
-    'requests>={0}'.format(REQUESTS_MIN_VERSION)
+    'requests>={0}'.format(REQUESTS_MIN_VERSION),
+    'kafka-python>={}'.format(KAFKA_PYTHON_MIN_VERSION)
 ]
 
 setup(

@@ -13,6 +13,8 @@ from exception.custom_exception import CollectorException
 from config.constant import ERROR_UNEXPECTED_EXIT_CODE
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from store.kafka_producer import IonianKafkaProducer
+from parse.daumnews_parser import DaumNewsParser
+
 
 class DaumNewsCollector(Collector):
 
@@ -75,6 +77,7 @@ class DaumNewsCollector(Collector):
     def collect(self):
         try:
             #storer = DynamoNewsMetaInfoStorer()
+            parser = DaumNewsParser()
 
             for cate_info in self.MAIN_CATE_INFO:
                 target_url = self.BASE_URL + '/' + cate_info['url_tail_path']
@@ -100,9 +103,6 @@ class DaumNewsCollector(Collector):
                     log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
                     while self.__is_exist_page(sub_cate_info['url'], req_page, self.TARGET_DATE):
-                        # if req_page is 2 :
-                        #     break
-
                         log.debug('waiting...')
                         time.sleep(2)
 
@@ -127,12 +127,7 @@ class DaumNewsCollector(Collector):
                         self.__new_count += len(news_list)
                         req_page += 1
 
-                        break
-
                     ionian_producer.close()
-
-                    #####
-                    break
 
                 log.info('sub_cate_url end. current count : {0}'.format(self.__new_count))
 
@@ -217,11 +212,11 @@ class DaumNewsCollector(Collector):
                 news_info['sub_category_en_name'] = sub_cate_info['sub_category_en_name']
 
                 new_title = el.find('a', class_='link_txt').get_text()
-                # log.debug(new_title)
+                log.debug(new_title)
                 news_info['title'] = new_title
 
                 news_url = el.find('a', class_='link_txt').get('href')
-                # log.debug(news_url)
+                log.debug(news_url)
                 news_info['url'] = news_url
 
                 news_info_el = el.find('span', class_='info_news').get_text().replace(' ', '').split('·')
