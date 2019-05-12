@@ -14,7 +14,7 @@ class ConfigLoader():
 
     def __init__(self, arg_env):
         if arg_env != DEV_ENV and arg_env != STG_ENV and arg_env != PROD_ENV:
-            raise CannotRunException("arg_env is unknown... : {}".format(arg_env), ERROR_ARG_EXIT_CODE)
+            raise CannotRunException("arg_env is unknown... : {0}".format(arg_env), ERROR_ARG_EXIT_CODE)
         else:
             self.__CURRENT_ENV = arg_env
             logger.info("### Input ENV : {}".format(self.__CURRENT_ENV))
