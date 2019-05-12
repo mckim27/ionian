@@ -35,7 +35,7 @@ if __name__ == "__main__" :
         log.info('### input arg_env : {0}'.format(arg_env))
         log.info('### input role : {0}'.format(role))
         log.info('### input target_site : {0}'.format(target_site))
-        
+
         if role == 'collector' :
             if target_site == 'DAUM':
                 log.info('### collector start. target site : {0}'.format(target_site))

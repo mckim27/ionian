@@ -27,7 +27,7 @@ class DaumNewsParser:
 
                 for msg in consumer:
                     news_info = json.loads(msg.value)
-                    print(news_info)
+                    # print(news_info)
                     self.parse(news_info)
 
                 log.info('### Daum News Parser is waiting ...')
