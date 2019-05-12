@@ -1,6 +1,10 @@
 version: 2
 jobs:
   build:  # required for runs that don't use workflows
+    branches:
+      only:
+        - master
+        - /rc-.*/
     working_directory: ~/ionian
     docker:
       - image: circleci/python:3.6.8  # primary container for the build job
@@ -22,7 +26,7 @@ jobs:
                 - "/usr/local/lib/python3.6/site-packages"
           - run:
               command: |
-                pipenv run python manage.py test
+                pipenv run python test.py
           - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
               path: test-results
           - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
