@@ -1,6 +1,8 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
+from sys import exit
+
 
 class ExitException(Exception):
     __exit_code = 1

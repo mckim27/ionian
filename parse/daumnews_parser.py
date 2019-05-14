@@ -11,6 +11,8 @@ from init import constant
 from exception.custom_exception import ParserException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from utils.etc import get_pretty_traceback
+from sys import exit
+
 
 class DaumNewsParser:
 
@@ -42,7 +44,9 @@ class DaumNewsParser:
 
                 # auto commit default true
                 consumer.close()
+
         except KeyboardInterrupt:
+            # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
             self.stop()
 
         except Exception as e:
@@ -51,7 +55,8 @@ class DaumNewsParser:
 
         finally:
             # 예상치 못하게 종료될 경우 현재 consumer close. 이미 close 되있다면 내부에서 알아서 그냥 리턴.
-            if consumer is not None: consumer.close()
+            if consumer is not None:
+                consumer.close()
 
     # TODO html parse code 구현하기.
     def parse(self, news_info):
