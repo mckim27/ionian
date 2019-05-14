@@ -9,7 +9,7 @@ from collect.daumnews_collector import DaumNewsCollector
 from parse.daumnews_parser import DaumNewsParser
 from init.config_loader import ConfigLoader
 from init.constant import *
-
+from utils.etc import get_pretty_traceback
 
 if __name__ == "__main__" :
     try:
@@ -56,15 +56,15 @@ if __name__ == "__main__" :
                 log.info('{0}-parse not implemented...'.format(target_site))
 
     except CannotRunException as cre:
-        log.error(traceback.format_exc())
+        log.error(get_pretty_traceback())
         cre.exit()
 
     except CollectorException as ce:
-        log.error(traceback.format_exc())
+        log.error(get_pretty_traceback())
         ce.exit()
 
     except Exception as e:
-        log.error('Main Error Unknown Exception... e : {}'.format(traceback.format_exc()))
+        log.error('Main Error Unexpected Exception... e : {0}'.format(get_pretty_traceback()))
         exit(ERROR_UNEXPECTED_EXIT_CODE)
 
 
