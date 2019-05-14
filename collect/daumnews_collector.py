@@ -131,7 +131,8 @@ class DaumNewsCollector(Collector):
                 log.info('sub_cate_url end. current count : {0}'.format(self.__new_count))
 
         except Exception as e:
-            raise CollectorException('Collector Exception : {}'.format(e), ERROR_UNEXPECTED_EXIT_CODE)
+            raise CollectorException('Occur to unexpected Exception in collector : {0}'.
+                                     format(e), ERROR_UNEXPECTED_EXIT_CODE)
 
     def store(self):
         None
