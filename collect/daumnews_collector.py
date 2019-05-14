@@ -10,8 +10,7 @@ from utils.date_util import get_previous_day
 from bs4 import BeautifulSoup
 from collect.collector import Collector
 from exception.custom_exception import CollectorException
-from config.constant import ERROR_UNEXPECTED_EXIT_CODE
-from store.dynamo_storer import DynamoNewsMetaInfoStorer
+from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from store.kafka_producer import IonianKafkaProducer
 from parse.daumnews_parser import DaumNewsParser
 
