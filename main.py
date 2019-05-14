@@ -7,8 +7,8 @@ from exception.custom_exception import *
 from logzero import logger as log
 from collect.daumnews_collector import DaumNewsCollector
 from parse.daumnews_parser import DaumNewsParser
-from config.config_loader import ConfigLoader
-from config.constant import *
+from init.config_loader import ConfigLoader
+from init.constant import *
 
 
 if __name__ == "__main__" :

@@ -7,7 +7,7 @@ from logzero import logger as log
 from kafka import KafkaConsumer
 import requests
 from bs4 import BeautifulSoup
-from config import constant
+from init import constant
 
 
 class DaumNewsParser:
@@ -22,17 +22,15 @@ class DaumNewsParser:
                 consumer = KafkaConsumer(
                     'news_meta_info', auto_offset_reset='latest',
                     bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
-                    consumer_timeout_ms=5000, max_poll_records=10
+                    consumer_timeout_ms=5000, max_poll_records=20
                 )
 
                 for msg in consumer:
                     news_info = json.loads(msg.value)
                     # print(news_info)
                     self.parse(news_info)
-
-                log.info('### Daum News Parser is waiting ...')
-
-                time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
+                    log.info('### Parser sleeping ... wait a moment ... ')
+                    time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
 
         except KeyboardInterrupt:
             self.stop()

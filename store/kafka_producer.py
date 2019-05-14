@@ -3,7 +3,7 @@
 
 from kafka import KafkaProducer
 from logzero import logger as log
-from config import constant
+from init import constant
 
 
 class IonianKafkaProducer:

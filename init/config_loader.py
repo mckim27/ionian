@@ -6,9 +6,10 @@ import logging
 import logzero
 import os
 from logzero import logger
-from config.constant import DEV_ENV, STG_ENV, PROD_ENV, ERROR_ARG_EXIT_CODE, ERROR_LOAD_CONFIG_EXIT_CODE
+from init.constant import DEV_ENV, STG_ENV, PROD_ENV, ERROR_ARG_EXIT_CODE, ERROR_LOAD_CONFIG_EXIT_CODE
 from exception.custom_exception import *
-from config import constant
+from init import constant
+
 
 class ConfigLoader():
 
