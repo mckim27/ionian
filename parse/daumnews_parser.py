@@ -62,7 +62,7 @@ class DaumNewsParser:
     def parse(self, news_info):
         log.debug('### parsing target url : {0}'.format(news_info['url']))
 
-        result_text = None
+        result_text = ''
 
         try:
             req = requests.get(news_info['url'])
