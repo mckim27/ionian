@@ -39,7 +39,7 @@ class DaumNewsParser:
                     news_info = json.loads(msg.value)
                     # print(news_info)
                     self.parse(news_info)
-                    log.info('### Parser sleeping ... wait a moment ... ')
+                    log.info('### Parser waiting ... wait a moment ... ')
                     time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
 
                 # auto commit default true

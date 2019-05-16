@@ -176,7 +176,7 @@ class DaumNewsCollector(Collector):
 
     def __get_newslist(self, cate_info, sub_cate_info, req_page, reg_date):
         # ex) https://media.daum.net/breakingnews/society/affair?page=1&regDate=20190501
-        # TODO news Object 만들어서 list 로 만들고 return 하도록 구현예정.
+
         target_url = sub_cate_info['url']
         target_url += '?' + self.PAGE_PARAM_KEY + str(req_page) + '&' + self.DATE_PARAM_KEY + reg_date
         log.debug('target_url : {0}'.format(target_url))
