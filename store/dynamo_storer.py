@@ -1,9 +1,8 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-# import boto3
+import boto3
 import datetime
-from logzero import logger as log
 
 
 class DynamoNewsMetaInfoStorer :

@@ -16,7 +16,8 @@ PY_YAML_MIN_VERSION = '5.1'
 LOG_ZERO_MIN_VERSION = '1.5'
 BS4_MIN_VERSION = '4.7'
 REQUESTS_MIN_VERSION = '2.21'
-KAFKA_PYTHON_MIN_VERSION = 1.4
+KAFKA_PYTHON_MIN_VERSION = '1.4'
+
 # This check and everything above must remain compatible with python 2.X.
 ##########################################################################
 #                               INFO                                     #
@@ -35,12 +36,12 @@ REQUIREMENTS = [
     'logzero>={0}'.format(LOG_ZERO_MIN_VERSION),
     'beautifulsoup4>={0}'.format(BS4_MIN_VERSION),
     'requests>={0}'.format(REQUESTS_MIN_VERSION),
-    'kafka-python>={}'.format(KAFKA_PYTHON_MIN_VERSION)
+    'kafka-python>={0}'.format(KAFKA_PYTHON_MIN_VERSION),
 ]
 
 setup(
     name="Ionian News Crawler",
-    # namespace_packages=['google'],
+    # namespace_packages=['scale'],
     version="0.1.0",
     python_require='>{}.{}'.format(*IONIAN_REQUIRED_PYTHON),
     author="mckim",
