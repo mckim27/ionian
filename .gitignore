@@ -58,7 +58,7 @@ docs/_build/
 target/
 
 ref/
-
 .idea/
-
 log/
+data/
+\.DS_Store
