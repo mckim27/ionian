@@ -11,6 +11,7 @@ from init import constant
 from exception.custom_exception import ParserException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from utils.etc import get_pretty_traceback
+from store.news_textfile_storer import DaumNewsTextFileStorer
 from sys import exit
 
 
@@ -24,6 +25,8 @@ class DaumNewsParser:
         consumer = None
 
         try:
+            text_file_storer = DaumNewsTextFileStorer()
+
             while True:
                 log.info('### Consumer is waiting ...')
                 time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
@@ -38,7 +41,11 @@ class DaumNewsParser:
                 for msg in consumer:
                     news_info = json.loads(msg.value)
                     # print(news_info)
-                    self.parse(news_info)
+                    news_contents = self.parse(news_info)
+                    news_info['contents'] = news_contents
+
+                    text_file_storer.store(news_info)
+
                     log.info('### Parser waiting ... wait a moment ... ')
                     time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
 
@@ -87,6 +94,10 @@ class DaumNewsParser:
 
             for text_block in re:
                 log.debug(text_block.get_text())
+
+                if result_text != '':
+                    result_text += '\n'
+
                 result_text += text_block.get_text()
 
         except Exception as e:
