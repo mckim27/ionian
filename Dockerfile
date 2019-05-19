@@ -8,6 +8,10 @@ COPY . /ionian
 
 WORKDIR /ionian
 
+RUN mkdir ~/.aws
+
+# TODO aws 정보 이미지 실행 시 받을수 있게 해야함.
+
 RUN python setup.py install
 
 ENTRYPOINT ["python", "main.py"]
