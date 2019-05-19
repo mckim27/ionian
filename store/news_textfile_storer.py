@@ -32,7 +32,6 @@ class DaumNewsTextFileStorer:
             data_path = Path(self.__root_data_path)
             data_path.mkdir(parents=True, exist_ok=False)
 
-    # 매번 exist check 는 비효율적.... 추후 변경할 것.
     def store(self, news_info):
         store_path = self.__root_data_path + '/' + self.__yesterday_date
 
@@ -59,8 +58,13 @@ class DaumNewsTextFileStorer:
 
         store_path += '/' + news_info['origin_create_date'] + '.txt'
 
+        # 파일 이름이 이미 존재하면 저장하지 않고 false return
         if os.path.exists(store_path):
             log.warn('### file "{0}" exist ... '.format(store_path))
+
+            return False
         else:
             with open(store_path, mode='wt', encoding='utf-8') as f:
                 f.write(news_info['contents'])
+
+            return True
