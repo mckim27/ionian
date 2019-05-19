@@ -12,6 +12,7 @@ from exception.custom_exception import ParserException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from utils.etc import get_pretty_traceback
 from store.news_textfile_storer import DaumNewsTextFileStorer
+from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from sys import exit
 
 
@@ -21,11 +22,18 @@ class DaumNewsParser:
         log.info('### Daum News Parser stopping ...')
         exit()
 
+    # TODO text data validation 필요함.
+    #  영어기사도 존재. 빈 텍스트도 존재.
+    #  한글이라도 글자수가 너무 적을 경우는 저장하지 않도록 변경 필요.
+    def __is_validat_text(self):
+        return True
+
     def waiting_and_parsing(self):
         consumer = None
 
         try:
             text_file_storer = DaumNewsTextFileStorer()
+            dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
 
             while True:
                 log.info('### Consumer is waiting ...')
@@ -37,20 +45,30 @@ class DaumNewsParser:
                     consumer_timeout_ms=5000, max_poll_records=50
                 )
 
+                news_meta_info_list = []
+
                 # TODO Parsing 된 text 저장하는 부분 구현
                 for msg in consumer:
                     news_info = json.loads(msg.value)
+
                     # print(news_info)
-                    news_contents = self.parse(news_info)
+                    news_contents = self.parse(news_info['url'])
+
                     news_info['contents'] = news_contents
 
-                    text_file_storer.store(news_info)
+                    # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
+                    if self.__is_validat_text() and \
+                            text_file_storer.store(news_info):
+                        news_meta_info_list.append(news_info)
 
                     log.info('### Parser waiting ... wait a moment ... ')
                     time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
 
                 # auto commit default true
                 consumer.close()
+
+                # TODO aws config docker file 에 추가해야 정상동작함.
+                # dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
@@ -66,13 +84,13 @@ class DaumNewsParser:
                 consumer.close()
 
     # TODO html parse code 구현하기.
-    def parse(self, news_info):
-        log.debug('### parsing target url : {0}'.format(news_info['url']))
+    def parse(self, page_url):
+        log.debug('### parsing target url : {0}'.format(page_url))
 
         result_text = ''
 
         try:
-            req = requests.get(news_info['url'])
+            req = requests.get(page_url)
             html = req.text
 
             header = req.headers
