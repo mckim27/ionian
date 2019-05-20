@@ -8,3 +8,4 @@ docker-compose*
 .git
 .gitignore
 .idea
+data
