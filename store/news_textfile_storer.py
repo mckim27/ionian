@@ -67,4 +67,6 @@ class DaumNewsTextFileStorer:
             with open(store_path, mode='wt', encoding='utf-8') as f:
                 f.write(news_info['contents'])
 
+            log.info('### file "{0}" create success.'.format(store_path))
+
             return True
