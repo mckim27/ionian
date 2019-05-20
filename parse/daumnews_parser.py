@@ -29,25 +29,26 @@ class DaumNewsParser:
         return True
 
     def waiting_and_parsing(self):
-        consumer = None
+        # consumer 연결 한번으로 변경.
+        # TODO group ID 및 세부 옵션으로 설정해볼 것.
+        consumer = KafkaConsumer(
+            'news_meta_info', auto_offset_reset='latest',
+            bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
+            consumer_timeout_ms=5000, max_poll_records=10
+        )
+
+        text_file_storer = DaumNewsTextFileStorer()
+        dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
 
         try:
-            text_file_storer = DaumNewsTextFileStorer()
-            dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
-
             while True:
                 log.info('### Consumer is waiting ...')
                 time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
 
-                consumer = KafkaConsumer(
-                    'news_meta_info', auto_offset_reset='latest',
-                    bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
-                    consumer_timeout_ms=5000, max_poll_records=50
-                )
-
                 news_meta_info_list = []
 
                 # TODO Parsing 된 text 저장하는 부분 구현
+                item_count = 0
                 for msg in consumer:
                     news_info = json.loads(msg.value)
 
@@ -57,18 +58,18 @@ class DaumNewsParser:
                     news_info['contents'] = news_contents
 
                     # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
+
                     if self.__is_validat_text() and \
                             text_file_storer.store(news_info):
                         news_meta_info_list.append(news_info)
+                        item_count += 1
 
-                    log.info('### Parser waiting ... wait a moment ... ')
-                    time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
+                    if item_count == constant.CONFIG['db_writer_size']:
+                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                        news_meta_info_list = []
+                        item_count = 0
 
-                # auto commit default true
-                consumer.close()
-
-                # TODO aws config docker file 에 추가해야 정상동작함.
-                # dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                # TODO for 문 빠져나온 경우 item_count 가 0 보다 클 경우는 insert 해야함.
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
@@ -79,17 +80,19 @@ class DaumNewsParser:
                                   format(e), ERROR_UNEXPECTED_EXIT_CODE)
 
         finally:
-            # 예상치 못하게 종료될 경우 현재 consumer close. 이미 close 되있다면 내부에서 알아서 그냥 리턴.
+            # 종료될 경우 현재 consumer close. 이미 close 되있다면 내부에서 알아서 그냥 리턴.
             if consumer is not None:
                 consumer.close()
 
-    # TODO html parse code 구현하기.
     def parse(self, page_url):
         log.debug('### parsing target url : {0}'.format(page_url))
 
         result_text = ''
 
         try:
+            log.info('### Parser waiting ... wait a moment ... ')
+            time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
+
             req = requests.get(page_url)
             html = req.text
 
