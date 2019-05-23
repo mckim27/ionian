@@ -32,7 +32,8 @@ class DaumNewsParser:
         # consumer 연결 한번으로 변경.
         # TODO group ID 및 세부 옵션으로 설정해볼 것.
         consumer = KafkaConsumer(
-            'news_meta_info', auto_offset_reset='latest',
+            constant.CONFIG['daum_news_topic_name'],
+            auto_offset_reset='latest', group_id='daum_news',
             bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
             consumer_timeout_ms=5000, max_poll_records=10
         )
