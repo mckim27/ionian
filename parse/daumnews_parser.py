@@ -33,7 +33,6 @@ class DaumNewsParser(Parser):
     # override
     def waiting_and_parsing(self):
         # consumer 연결 한번으로 변경.
-        # TODO group ID 및 세부 옵션으로 설정해볼 것.
         consumer = KafkaConsumer(
             constant.CONFIG['daum_news_topic_name'],
             auto_offset_reset='latest', group_id='daum_news',
@@ -51,7 +50,6 @@ class DaumNewsParser(Parser):
 
                 news_meta_info_list = []
 
-                # TODO Parsing 된 text 저장하는 부분 구현
                 item_count = 0
                 for msg in consumer:
                     news_info = json.loads(msg.value)
@@ -62,14 +60,14 @@ class DaumNewsParser(Parser):
                     news_info['contents'] = news_contents
 
                     # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
-
                     if self.__is_validat_text() and \
                             text_file_storer.store(news_info):
                         news_meta_info_list.append(news_info)
                         item_count += 1
 
+                    # TODO  
                     if item_count == constant.CONFIG['db_writer_size']:
-                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                        # dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
                         news_meta_info_list = []
                         item_count = 0
 
