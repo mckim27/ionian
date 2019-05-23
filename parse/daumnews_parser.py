@@ -14,10 +14,12 @@ from utils.etc import get_pretty_traceback
 from store.news_textfile_storer import DaumNewsTextFileStorer
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from sys import exit
+from parse.parser import Parser
 
 
-class DaumNewsParser:
+class DaumNewsParser(Parser):
 
+    # override
     def stop(self):
         log.info('### Daum News Parser stopping ...')
         exit()
@@ -28,6 +30,7 @@ class DaumNewsParser:
     def __is_validat_text(self):
         return True
 
+    # override
     def waiting_and_parsing(self):
         # consumer 연결 한번으로 변경.
         # TODO group ID 및 세부 옵션으로 설정해볼 것.
@@ -85,6 +88,7 @@ class DaumNewsParser:
             if consumer is not None:
                 consumer.close()
 
+    # override
     def parse(self, page_url):
         log.debug('### parsing target url : {0}'.format(page_url))
 
