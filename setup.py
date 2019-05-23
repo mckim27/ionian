@@ -40,13 +40,13 @@ REQUIREMENTS = [
     'requests>={0}'.format(REQUESTS_MIN_VERSION),
     'kafka-python>={0}'.format(KAFKA_PYTHON_MIN_VERSION),
     'boto3>={0}'.format(BOTO3_MIN_VERSION),
-    'urllib3>={0}'.format(URL_LIB3_MIN_VERSION)
+    'urllib3<={0}'.format(URL_LIB3_MIN_VERSION)
 ]
 
 setup(
     name="Ionian News Crawler",
     # namespace_packages=['scale'],
-    version="0.1.0",
+    version="1.2.0",
     python_require='>{}.{}'.format(*IONIAN_REQUIRED_PYTHON),
     author="mckim",
     author_email="bluevoice27@gmail.com",
