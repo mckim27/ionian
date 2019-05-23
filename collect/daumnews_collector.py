@@ -13,13 +13,14 @@ from exception.custom_exception import CollectorException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from store.kafka_producer import IonianKafkaProducer
 from parse.daumnews_parser import DaumNewsParser
-
+from init import constant
 
 class DaumNewsCollector(Collector):
 
     __new_info_list = None
 
     def __init__(self):
+        self.SITE_NAME = 'daum'
         self.BASE_URL = 'https://media.daum.net'
         self.PAGE_PARAM_KEY = 'page='
         self.DATE_PARAM_KEY = 'regDate='
@@ -114,7 +115,7 @@ class DaumNewsCollector(Collector):
 
                         for news in news_list:
                             ionian_producer.publish_message(
-                                'news_meta_info',
+                                constant.CONFIG['daum_news_topic_name'],
                                 news['origin_create_date'],
                                 json.dumps(news)
                             )
@@ -206,6 +207,7 @@ class DaumNewsCollector(Collector):
             if type(el) is not bs4.element.NavigableString:
                 # print(el)
                 news_info = {}
+                news_info['site_name'] = self.SITE_NAME
                 news_info['category_name'] = cate_info['category_name']
                 news_info['category_en_name'] = cate_info['category_en_name']
                 news_info['sub_category_name'] = sub_cate_info['sub_category_name']
