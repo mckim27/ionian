@@ -12,7 +12,6 @@ class IonianKafkaProducer:
 
     def __init__(self):
         try:
-            print(constant.CONFIG['kafka_brokers'])
             self.__producer = KafkaProducer(
                 bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10))
         except Exception as ex:
