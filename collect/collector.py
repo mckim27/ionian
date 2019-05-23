@@ -22,7 +22,3 @@ class Collector(ABC) :
     @abstractmethod
     def collect(self):
         pass
-
-    @abstractmethod
-    def store(self):
-        pass

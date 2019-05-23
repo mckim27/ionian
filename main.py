@@ -10,6 +10,7 @@ from parse.daumnews_parser import DaumNewsParser
 from init.config_loader import ConfigLoader
 from init.constant import *
 from utils.etc import get_pretty_traceback
+from init.factory import CollectorFactory, ParserFactory
 
 if __name__ == "__main__" :
     try:
@@ -33,7 +34,7 @@ if __name__ == "__main__" :
                             help='aws_secret_access_key info. not requirement.')
 
         args = parser.parse_args()
-        target_site = args.target.upper()
+        target_site = args.target.lower()
         role = args.role.lower()
         arg_env = args.env.lower()
 
@@ -52,23 +53,12 @@ if __name__ == "__main__" :
         log.info('### input target_site : {0}'.format(target_site))
 
         if role == 'collector' :
-            if target_site == 'DAUM':
-                log.info('### collector start. target site : {0}'.format(target_site))
+            collector = CollectorFactory.get_collector(target_site)
+            collector.collect()
 
-                collector = DaumNewsCollector()
-                collector.collect()
-            else:
-                log.info('### input target site : {0}'.format(target_site))
-                log.info('{0}-collector not implemented...'.format(target_site))
         else:
-            if target_site == 'DAUM':
-                log.info('### parse start. target site : {0}'.format(target_site))
-
-                parser = DaumNewsParser()
-                parser.waiting_and_parsing()
-            else:
-                log.info('### input target site : {0}'.format(target_site))
-                log.info('{0}-parse not implemented...'.format(target_site))
+            parser = ParserFactory.get_parser(target_site)
+            parser.waiting_and_parsing()
 
     except CannotRunException as cre:
         log.error(get_pretty_traceback())
