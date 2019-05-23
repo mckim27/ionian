@@ -16,7 +16,9 @@ PY_YAML_MIN_VERSION = '5.1'
 LOG_ZERO_MIN_VERSION = '1.5'
 BS4_MIN_VERSION = '4.7'
 REQUESTS_MIN_VERSION = '2.21'
+BOTO3_MIN_VERSION = '1.9'
 KAFKA_PYTHON_MIN_VERSION = '1.4'
+URL_LIB3_MIN_VERSION = '1.23'
 
 # This check and everything above must remain compatible with python 2.X.
 ##########################################################################
@@ -37,12 +39,14 @@ REQUIREMENTS = [
     'beautifulsoup4>={0}'.format(BS4_MIN_VERSION),
     'requests>={0}'.format(REQUESTS_MIN_VERSION),
     'kafka-python>={0}'.format(KAFKA_PYTHON_MIN_VERSION),
+    'boto3>={0}'.format(BOTO3_MIN_VERSION),
+    'urllib3<={0}'.format(URL_LIB3_MIN_VERSION)
 ]
 
 setup(
     name="Ionian News Crawler",
     # namespace_packages=['scale'],
-    version="0.1.0",
+    version="1.2.0",
     python_require='>{}.{}'.format(*IONIAN_REQUIRED_PYTHON),
     author="mckim",
     author_email="bluevoice27@gmail.com",
@@ -53,7 +57,7 @@ setup(
     classifiers=[
         'Operating System :: Unix',
         'Operating System :: MacOS',
-        'Operating System :: Windows',
+        'Operating System :: Linux',
         'Programming Language :: Python',
         'Programming Language :: 3'
         'Programming Language :: 3.5',

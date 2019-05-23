@@ -24,8 +24,6 @@ class DaumNewsTextFileStorer:
     # text/news/daum/{yyyy-mm-dd}/{main_cate}/{subcate}/{origin_create_date}
 
     def __init__(self):
-
-        self.__yesterday_date = get_previous_day(1, "%Y%m%d")
         self.__root_data_path = './data/text/news/daum'
 
         if not os.path.exists(self.__root_data_path):
@@ -33,7 +31,12 @@ class DaumNewsTextFileStorer:
             data_path.mkdir(parents=True, exist_ok=False)
 
     def store(self, news_info):
-        store_path = self.__root_data_path + '/' + self.__yesterday_date
+        assert news_info['origin_create_date'] is not None \
+            and len(news_info['origin_create_date']) == 17
+
+        ymd_date = news_info['origin_create_date']
+        ymd_date = ymd_date[:8]
+        store_path = self.__root_data_path + '/' + ymd_date
 
         if not os.path.exists(store_path):
             os.mkdir(store_path)
@@ -66,5 +69,7 @@ class DaumNewsTextFileStorer:
         else:
             with open(store_path, mode='wt', encoding='utf-8') as f:
                 f.write(news_info['contents'])
+
+            log.info('### file "{0}" create success.'.format(store_path))
 
             return True

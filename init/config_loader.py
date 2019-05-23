@@ -9,6 +9,7 @@ from logzero import logger
 from init.constant import DEV_ENV, STG_ENV, PROD_ENV, ERROR_ARG_EXIT_CODE, ERROR_LOAD_CONFIG_EXIT_CODE
 from exception.custom_exception import *
 from init import constant
+from pathlib import Path
 
 
 class ConfigLoader():
@@ -20,7 +21,42 @@ class ConfigLoader():
             self.__CURRENT_ENV = arg_env
             logger.info("### Input ENV : {}".format(self.__CURRENT_ENV))
 
-    def load_config(self) :
+    def set_aws_info(self, aws_region, aws_access_key_id, aws_secret_access_key):
+        home = str(Path.home())
+        target_path = home + '/.aws'
+
+        if aws_region is None or aws_access_key_id is None or aws_secret_access_key is None:
+            logger.warn('### There is a empty value among aws_config inputs')
+            logger.warn('### The dynamo_store feature is disabled ...')
+
+            constant.CONFIG['aws_enable'] = False
+
+        elif os.path.exists(target_path):
+            logger.info('### aws_config exist ... config setting is passed. ')
+            constant.CONFIG['aws_enable'] = True
+        else:
+            constant.CONFIG['aws_enable'] = True
+
+            os.mkdir(target_path)
+            with open(target_path + '/config', mode='wt', encoding='utf-8') as f:
+                f.write(
+                    '[default]\n' +
+                    'region = ' + aws_region + '\n' +
+                    'output = json\n')
+
+            os.chmod(target_path + '/config', 0o600)
+
+            with open(target_path + '/credentials', mode='wt', encoding='utf-8') as f:
+                f.write(
+                    '[default]\n' +
+                    'aws_access_key_id = ' + aws_access_key_id + '\n' +
+                    'aws_secret_access_key = ' + aws_secret_access_key + '\n')
+
+            os.chmod(target_path + '/credentials', 0o600)
+
+            logger.info('### aws_config setting is complete !!')
+
+    def load_ionian_config(self) :
         load_file_path = './config/config_' + self.__CURRENT_ENV + ".yml"
 
         try:
