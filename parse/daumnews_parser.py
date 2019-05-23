@@ -41,7 +41,7 @@ class DaumNewsParser(Parser):
         )
 
         text_file_storer = DaumNewsTextFileStorer()
-        dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
+        # dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
 
         try:
             while True:
