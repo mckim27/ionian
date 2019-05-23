@@ -12,11 +12,12 @@ from exception.custom_exception import CollectorException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from init import constant
 
+
 class DaumNewsCollector(Collector):
 
-    __new_info_list = None
-
     def __init__(self):
+        Collector.__init__(self)
+
         self.SITE_NAME = 'daum'
         self.BASE_URL = 'https://media.daum.net'
         self.PAGE_PARAM_KEY = 'page='
@@ -127,9 +128,6 @@ class DaumNewsCollector(Collector):
         except Exception as e:
             raise CollectorException('Occur to unexpected Exception in collector : {0}'.
                                      format(e), ERROR_UNEXPECTED_EXIT_CODE)
-
-    def store(self):
-        None
 
     def __get_sub_categories(self, cate_url):
         req = requests.get(cate_url)
