@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import json
 import bs4
 import time
 from logzero import logger as log
@@ -11,8 +10,6 @@ from bs4 import BeautifulSoup
 from collect.collector import Collector
 from exception.custom_exception import CollectorException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
-from store.kafka_producer import IonianKafkaProducer
-from parse.daumnews_parser import DaumNewsParser
 from init import constant
 
 class DaumNewsCollector(Collector):
@@ -76,9 +73,7 @@ class DaumNewsCollector(Collector):
     # override.
     def collect(self):
         try:
-            #storer = DynamoNewsMetaInfoStorer()
-            parser = DaumNewsParser()
-
+            # main category loop start.
             for cate_info in self.MAIN_CATE_INFO:
                 target_url = self.BASE_URL + '/' + cate_info['url_tail_path']
 
@@ -95,10 +90,9 @@ class DaumNewsCollector(Collector):
                 log.debug('### sub_cate_urls ###')
                 log.debug(sub_cate_info_list)
 
+                # sub category loop start
                 for sub_cate_info in sub_cate_info_list:
                     req_page = 1
-
-                    ionian_producer = IonianKafkaProducer()
 
                     log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
@@ -114,22 +108,21 @@ class DaumNewsCollector(Collector):
                             break
 
                         for news in news_list:
-                            ionian_producer.publish_message(
+                            self.publish_message(
                                 constant.CONFIG['daum_news_topic_name'],
                                 news['origin_create_date'],
-                                json.dumps(news)
+                                news
                             )
-
-                        # storer.store_to_dynamo(news_list_part)
-
-                        # log.debug(news_list_part)
 
                         self.__new_count += len(news_list)
                         req_page += 1
+                # sub category loop end
+            # main category loop end.
 
-                    ionian_producer.close()
+            # producer close.
+            self.close()
 
-                log.info('sub_cate_url end. current count : {0}'.format(self.__new_count))
+            log.info('The daum news collector\'s job is finished. total news count : {0}'.format(self.__new_count))
 
         except Exception as e:
             raise CollectorException('Occur to unexpected Exception in collector : {0}'.
