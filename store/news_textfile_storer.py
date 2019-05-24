@@ -3,8 +3,8 @@
 
 import os
 from pathlib import Path
-from utils.date_util import get_previous_day
 from logzero import logger as log
+from utils.text_util import assert_str_and_empty, assert_str_and_length
 
 '''
 new_info dict
@@ -31,8 +31,7 @@ class DaumNewsTextFileStorer:
             data_path.mkdir(parents=True, exist_ok=False)
 
     def store(self, news_info):
-        assert news_info['origin_create_date'] is not None \
-            and len(news_info['origin_create_date']) == 17
+        assert_str_and_length(news_info['origin_create_date'], 17)
 
         ymd_date = news_info['origin_create_date']
         ymd_date = ymd_date[:8]
@@ -42,15 +41,14 @@ class DaumNewsTextFileStorer:
             os.mkdir(store_path)
 
         # assert category_en_name
-        assert news_info['category_en_name'] is not None \
-            and news_info['category_en_name'] != ''
+        assert_str_and_empty(news_info['category_en_name'])
 
         store_path += '/' + news_info['category_en_name']
         if not os.path.exists(store_path):
             os.mkdir(store_path)
 
         # assert sub_category_en_name
-        assert news_info['sub_category_en_name'] is not None
+        assert_str_and_empty(news_info['sub_category_en_name'])
 
         if news_info['sub_category_en_name'] != '-':
             store_path += '/' + news_info['sub_category_en_name']
