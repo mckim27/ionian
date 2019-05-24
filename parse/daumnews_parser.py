@@ -15,6 +15,7 @@ from store.news_textfile_storer import DaumNewsTextFileStorer
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from sys import exit
 from parse.parser import Parser
+from utils.text_util import is_empty_text, is_short_text, assert_str_default
 
 
 class DaumNewsParser(Parser):
@@ -24,11 +25,13 @@ class DaumNewsParser(Parser):
         log.info('### Daum News Parser stopping ...')
         exit()
 
-    # TODO text data validation 필요함.
+    # text data validation 필요함.
     #  영어기사도 존재. 빈 텍스트도 존재.
     #  한글이라도 글자수가 너무 적을 경우는 저장하지 않도록 변경 필요.
-    def __is_validat_text(self):
-        return True
+    def __is_validate_text(self, text):
+        assert_str_default(text)
+
+        return not is_empty_text(text) and not is_short_text(text)
 
     # override
     def waiting_and_parsing(self):
@@ -60,18 +63,21 @@ class DaumNewsParser(Parser):
                     news_info['contents'] = news_contents
 
                     # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
-                    if self.__is_validat_text() and \
+                    if self.__is_validate_text(news_info['contents']) and \
                             text_file_storer.store(news_info):
                         news_meta_info_list.append(news_info)
                         item_count += 1
 
-                    # TODO  
-                    if item_count == constant.CONFIG['db_writer_size']:
-                        # dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                    # 특정 갯수가 되면 dynamo db 에 insert
+                    if item_count >= constant.CONFIG['db_writer_size']:
+                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
                         news_meta_info_list = []
                         item_count = 0
+                    else:
+                        log.debug('### item_count : {0}'.format(item_count))
 
-                # TODO for 문 빠져나온 경우 item_count 가 0 보다 클 경우는 insert 해야함.
+                if len(news_meta_info_list) != 0:
+                    dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
