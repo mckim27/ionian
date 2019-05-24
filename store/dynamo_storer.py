@@ -33,5 +33,4 @@ class DynamoNewsMetaInfoStorer :
                     }
                 )
 
-        log.info('### dynamo batch writer end :: news catecory - {0} - {1}, creating {2} obj success'.
-                 format(news_info['category_name'], news_info['sub_category_name'], len(news_info_list)))
+        log.info('### dynamo batch writer end :: creating {0} obj success'.format(len(news_info_list)))
