@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import traceback
+from coverage import __version__
 from exception.custom_exception import *
 from logzero import logger as log
-from collect.daumnews_collector import DaumNewsCollector
-from parse.daumnews_parser import DaumNewsParser
 from init.config_loader import ConfigLoader
 from init.constant import *
 from utils.etc import get_pretty_traceback
@@ -45,6 +43,8 @@ if __name__ == "__main__" :
         config_loader = ConfigLoader(arg_env)
 
         config_loader.load_ionian_config()
+
+        log.info('### Ionian News Crawler v{0}'.format(__version__))
 
         config_loader.set_aws_info(aws_region, aws_access_key_id, aws_secret_access_key)
 
