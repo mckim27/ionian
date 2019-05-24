@@ -8,6 +8,7 @@ from __future__ import division
 from __future__ import unicode_literals
 import sys
 from setuptools import find_packages, setup
+from coverage import __version__, __author__, __author_email__, __description__, __license__, __name__
 
 CURRENT_PYTHON = sys.version_info[:2]
 IONIAN_REQUIRED_PYTHON = (3, 5)
@@ -44,15 +45,15 @@ REQUIREMENTS = [
 ]
 
 setup(
-    name="Ionian News Crawler",
+    name=__name__,
     # namespace_packages=['scale'],
-    version="1.2.0",
+    version=__version__,
     python_require='>{}.{}'.format(*IONIAN_REQUIRED_PYTHON),
-    author="mckim",
-    author_email="bluevoice27@gmail.com",
-    description=("News Crawler"),
+    author=__author__,
+    author_email=__author_email__,
+    description=__description__,
     package=find_packages(),
-    license="Apache License 2.0",
+    license=__license__,
     install_requires=REQUIREMENTS,
     classifiers=[
         'Operating System :: Unix',
