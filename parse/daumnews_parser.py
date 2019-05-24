@@ -70,7 +70,7 @@ class DaumNewsParser(Parser):
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
-                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list, 'daum')
                         news_meta_info_list = []
                         item_count = 0
                     else:

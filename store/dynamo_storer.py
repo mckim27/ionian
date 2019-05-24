@@ -14,7 +14,7 @@ class DynamoNewsMetaInfoStorer :
         self.__table = dynamodb.Table('news_meta_info')
 
 
-    def store_to_dynamo(self, news_info_list):
+    def store_to_dynamo(self, news_info_list, site_name):
         # 뉴스 갯수가 많으므로 batch writer 이용.
         with self.__table.batch_writer() as batch:
             for news_info in news_info_list:
@@ -29,7 +29,7 @@ class DynamoNewsMetaInfoStorer :
                         'sub_category_name': news_info['sub_category_name'],
                         'sub_category_en_name': news_info['sub_category_en_name'],
                         'create_date': datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'),
-                        'parsing_flag': 0
+                        'site_name' : site_name
                     }
                 )
 
