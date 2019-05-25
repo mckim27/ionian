@@ -40,8 +40,8 @@ REQUIREMENTS = [
     'beautifulsoup4>={0}'.format(BS4_MIN_VERSION),
     'requests>={0}'.format(REQUESTS_MIN_VERSION),
     'kafka-python>={0}'.format(KAFKA_PYTHON_MIN_VERSION),
-    'boto3>={0}'.format(BOTO3_MIN_VERSION),
-    'urllib3<={0}'.format(URL_LIB3_MIN_VERSION)
+    'boto3=={0}'.format(BOTO3_MIN_VERSION),
+    'urllib3=={0}'.format(URL_LIB3_MIN_VERSION)
 ]
 
 setup(
