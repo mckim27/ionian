@@ -29,8 +29,8 @@ class DaumNewsTextFileStorer:
         if not os.path.exists(self.__text_store_path):
             data_path = Path(self.__text_store_path)
             data_path.mkdir(parents=True, exist_ok=False)
-        else:
-            log.debug('???????')
+            log.info('### data root path create success. data_root_path : {0}'.format(self.__text_store_path))
+
     def store(self, news_info):
         assert_str_and_length(news_info['origin_create_date'], 17)
 
