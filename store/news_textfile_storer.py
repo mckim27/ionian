@@ -58,7 +58,7 @@ class DaumNewsTextFileStorer:
 
         # TODO news contents 빈값인 경우의 처리.
 
-        store_path += '/' + news_info['origin_create_date'] + '.txt'
+        store_path += '/' + news_info['origin_create_date'] + '.html'
 
         # 파일 이름이 이미 존재하면 저장하지 않고 false return
         if os.path.exists(store_path):
