@@ -3,6 +3,8 @@ log_dir_name: log
 log_file_name: ionian.log
 kafka_brokers:
   - 192.168.0.31:9092
+  - 192.168.0.32:9092
+  - 192.168.0.33:9092
 consumer_waiting_term_seconds: 5
 parser_waiting_term_seconds: 3
 db_writer_size: 20
