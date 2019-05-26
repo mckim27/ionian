@@ -8,4 +8,5 @@ kafka_brokers:
 consumer_waiting_term_seconds: 5
 parser_waiting_term_seconds: 3
 db_writer_size: 20
+data_root_path: ./data/text
 daum_news_topic_name: daum_news_info
