@@ -20,6 +20,10 @@ from utils.text_util import is_empty_text, is_short_text, assert_str_default
 
 class DaumNewsParser(Parser):
 
+    def __init__(self):
+        self.__text_storer = DaumNewsTextFileStorer()
+        self.__meta_info_storer = DynamoNewsMetaInfoStorer()
+
     # override
     def stop(self):
         log.info('### Daum News Parser stopping ...')
@@ -43,9 +47,6 @@ class DaumNewsParser(Parser):
             consumer_timeout_ms=5000, max_poll_records=10
         )
 
-        text_file_storer = DaumNewsTextFileStorer()
-        dynamo_meta_info_storer = DynamoNewsMetaInfoStorer()
-
         try:
             while True:
                 log.info('### Consumer is waiting ...')
@@ -64,20 +65,20 @@ class DaumNewsParser(Parser):
 
                     # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
                     if self.__is_validate_text(news_info['contents']) and \
-                            text_file_storer.store(news_info):
+                            self.__text_storer.store(news_info):
                         news_meta_info_list.append(news_info)
                         item_count += 1
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
-                        dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list, 'daum')
+                        self.__meta_info_storer.store(news_meta_info_list, 'daum')
                         news_meta_info_list = []
                         item_count = 0
                     else:
                         log.debug('### item_count : {0}'.format(item_count))
 
                 if len(news_meta_info_list) != 0:
-                    dynamo_meta_info_storer.store_to_dynamo(news_meta_info_list)
+                    self.__meta_info_storer.store(news_meta_info_list, 'daum')
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.

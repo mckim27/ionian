@@ -18,7 +18,7 @@ class DynamoNewsMetaInfoStorer :
         else:
             log.warn('### You can not use the dynamo store feature ....')
             
-    def store_to_dynamo(self, news_info_list, site_name):
+    def store(self, news_info_list, site_name):
 
         if self.__table is None:
             log.warn('### nothing to do ...')
