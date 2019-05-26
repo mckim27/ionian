@@ -8,7 +8,7 @@ from logzero import logger as log
 from init.config_loader import ConfigLoader
 from init.constant import *
 from utils.etc import get_pretty_traceback
-from init.factory import CollectorFactory, ParserFactory
+from init.factory import CollectorFactory, CrawlerFactory
 
 if __name__ == "__main__" :
     try:
@@ -17,7 +17,7 @@ if __name__ == "__main__" :
                             help='input target news site. now only DAUM site is supported...')
 
         parser.add_argument('--role', type=str, nargs='?', default='collector',
-                            help='input some role. \'collector\' or \'parse\'')
+                            help='input some role. \'collector\' or \'crawler\'')
 
         parser.add_argument('--env', type=str, nargs='?', default='dev',
                             help='input run env. \'dev\' or \'stg\' or \'prd\'')
@@ -57,8 +57,8 @@ if __name__ == "__main__" :
             collector.collect()
 
         else:
-            parser = ParserFactory.get_parser(target_site)
-            parser.waiting_and_parsing()
+            parser = CrawlerFactory.get_crawler(target_site)
+            parser.waiting_and_crawling()
 
     except CannotRunException as cre:
         log.error(get_pretty_traceback())
