@@ -3,7 +3,7 @@
 
 from logzero import logger as log
 from collect.daumnews_collector import DaumNewsCollector
-from parse.daumnews_parser import DaumNewsParser
+from crawl.daumnews_crawler import DaumNewsCrawler
 from exception.custom_exception import CannotRunException
 from init.constant import ERROR_NOT_IMPLEMENTATION
 
@@ -23,15 +23,15 @@ class CollectorFactory:
                 ERROR_NOT_IMPLEMENTATION)
 
 
-class ParserFactory:
+class CrawlerFactory:
 
     @staticmethod
-    def get_parser(target_site_name):
+    def get_crawler(target_site_name):
         if target_site_name == 'daum':
-            log.info('### The {0} parser will be start as soon as ...'.format(target_site_name))
+            log.info('### The {0} crawler will be start as soon as ...'.format(target_site_name))
 
-            return DaumNewsParser()
+            return DaumNewsCrawler()
         else:
             raise CannotRunException(
-                '{0}-parser not implementation ...'.format(target_site_name),
+                '{0}-crawler not implementation ...'.format(target_site_name),
                 ERROR_NOT_IMPLEMENTATION)

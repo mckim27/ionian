@@ -6,7 +6,6 @@ import json
 from logzero import logger as log
 from kafka import KafkaConsumer
 import requests
-from bs4 import BeautifulSoup
 from init import constant
 from exception.custom_exception import ParserException
 from init.constant import ERROR_UNEXPECTED_EXIT_CODE
@@ -14,11 +13,11 @@ from utils.etc import get_pretty_traceback
 from store.news_textfile_storer import DaumNewsTextFileStorer
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from sys import exit
-from parse.parser import Parser
+from crawl.crawler import Crawler
 from utils.text_util import is_empty_text, is_short_text, assert_str_default
 
 
-class DaumNewsParser(Parser):
+class DaumNewsCrawler(Crawler):
 
     def __init__(self):
         self.__text_storer = DaumNewsTextFileStorer()
@@ -26,7 +25,7 @@ class DaumNewsParser(Parser):
 
     # override
     def stop(self):
-        log.info('### Daum News Parser stopping ...')
+        log.info('### Daum News Crawler stopping ...')
         exit()
 
     # text data validation 필요함.
@@ -35,10 +34,10 @@ class DaumNewsParser(Parser):
     def __is_validate_text(self, text):
         assert_str_default(text)
 
-        return not is_empty_text(text) and not is_short_text(text)
+        return not is_empty_text(text)
 
     # override
-    def waiting_and_parsing(self):
+    def waiting_and_crawling(self):
         # consumer 연결 한번으로 변경.
         consumer = KafkaConsumer(
             constant.CONFIG['daum_news_topic_name'],
@@ -59,9 +58,7 @@ class DaumNewsParser(Parser):
                     news_info = json.loads(msg.value)
 
                     # print(news_info)
-                    news_contents = self.parse(news_info['url'])
-
-                    news_info['contents'] = news_contents
+                    news_info['contents'] = self.crawl(news_info['url'])
 
                     # 유효한 텍스트, 저장이 성공적으로 되었을 경우만 DB 에 저장할 list 에 append 함.
                     if self.__is_validate_text(news_info['contents']) and \
@@ -93,46 +90,23 @@ class DaumNewsParser(Parser):
             if consumer is not None:
                 consumer.close()
 
-    # override
-    def parse(self, page_url):
-        log.debug('### parsing target url : {0}'.format(page_url))
+    def crawl(self, page_url):
+        log.debug('### crawling target url : {0}'.format(page_url))
 
-        result_text = ''
+        raw_html = ''
 
         try:
-            log.info('### Parser waiting ... wait a moment ... ')
-            time.sleep(constant.CONFIG['parser_waiting_term_seconds'])
+            log.info('### Crawler waiting ... wait a moment ... ')
+            time.sleep(constant.CONFIG['crawler_waiting_term_seconds'])
 
-            req = requests.get(page_url)
-            html = req.text
+            res = requests.get(page_url)
 
-            header = req.headers
-            status = req.status_code
-            is_ok = req.ok
+            res.raise_for_status()  # ensure we notice bad responses
 
-            if not is_ok:
-                raise Exception('request Exception...')
-
-            soup = BeautifulSoup(html, 'html.parser')
-            news_view = soup.find('div', class_='news_view')
-            # log.debug(news_view)
-
-            # TODO summary_view 있는 경우 있음.
-
-            text_container = news_view.find('div', id='harmonyContainer')
-            # text = text_container.find_all('section')
-            re = text_container.find_all("p", attrs={"dmcf-ptype":True})
-
-            for text_block in re:
-                log.debug(text_block.get_text())
-
-                if result_text != '':
-                    result_text += '\n'
-
-                result_text += text_block.get_text()
+            raw_html = res.text
 
         except Exception as e:
             log.error(get_pretty_traceback())
 
         finally:
-            return result_text
+            return raw_html

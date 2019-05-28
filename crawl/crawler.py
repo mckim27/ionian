@@ -4,14 +4,14 @@
 from abc import ABC, abstractmethod
 
 
-class Parser(ABC) :
+class Crawler(ABC) :
 
     @abstractmethod
-    def waiting_and_parsing(self):
+    def waiting_and_crawling(self):
         pass
 
     @abstractmethod
-    def parse(self):
+    def crawl(self):
         pass
 
     @abstractmethod
