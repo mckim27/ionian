@@ -50,7 +50,7 @@ $(py3.6 env) python main.py --role=collector \
 ```
 
 #### crawler
-- aws 관련 값도 필수는 아니지만 없는 경우 dynamo db 에 저장하는 기능 동작 하지 않음.
+- docker 로 실행 시 aws 관련 값 필수는 아니지만 없는 경우 dynamo db 에 저장하는 기능 동작 하지 않음.
 ```bash
 $(py3.6 env) python main.py --role=crawler \
     --env=dev \
