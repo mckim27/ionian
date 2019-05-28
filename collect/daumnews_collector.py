@@ -98,8 +98,8 @@ class DaumNewsCollector(Collector):
                     log.debug('### sub_cate_url : {0}'.format(sub_cate_info['url']))
 
                     while self.__is_exist_page(sub_cate_info['url'], req_page, self.TARGET_DATE):
-                        log.debug('waiting...')
-                        time.sleep(2)
+                        log.debug('### collector is waiting ...')
+                        time.sleep(constant.CONFIG['collector_waiting_term_seconds'])
 
                         news_list = self.__get_newslist(
                             cate_info, sub_cate_info, req_page, self.TARGET_DATE)
