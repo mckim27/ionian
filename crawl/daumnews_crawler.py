@@ -34,7 +34,7 @@ class DaumNewsCrawler(Crawler):
     def __is_validate_text(self, text):
         assert_str_default(text)
 
-        return not is_empty_text(text) and not is_short_text(text)
+        return not is_empty_text(text)
 
     # override
     def waiting_and_crawling(self):
