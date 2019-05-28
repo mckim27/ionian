@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from logzero import logger as log
 from utils.text_util import assert_str_and_empty, assert_str_and_length
-
+from init import constant
 '''
 new_info dict
     'origin_create_date': 'yyyyMMddHHmmssSSS'
@@ -24,18 +24,19 @@ class DaumNewsTextFileStorer:
     # text/news/daum/{yyyy-mm-dd}/{main_cate}/{subcate}/{origin_create_date}
 
     def __init__(self):
-        self.__root_data_path = './data/text/news/daum'
+        self.__text_store_path = constant.CONFIG['data_root_path'] + '/news/daum'
 
-        if not os.path.exists(self.__root_data_path):
-            data_path = Path(self.__root_data_path)
+        if not os.path.exists(self.__text_store_path):
+            data_path = Path(self.__text_store_path)
             data_path.mkdir(parents=True, exist_ok=False)
+            log.info('### data root path create success. data_root_path : {0}'.format(self.__text_store_path))
 
     def store(self, news_info):
         assert_str_and_length(news_info['origin_create_date'], 17)
 
         ymd_date = news_info['origin_create_date']
         ymd_date = ymd_date[:8]
-        store_path = self.__root_data_path + '/' + ymd_date
+        store_path = self.__text_store_path + '/' + ymd_date
 
         if not os.path.exists(store_path):
             os.mkdir(store_path)
