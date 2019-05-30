@@ -15,7 +15,7 @@ from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from sys import exit
 from crawl.crawler import Crawler
 from utils.text_util import is_empty_text, is_short_text, assert_str_default
-
+from bs4 import BeautifulSoup
 
 class DaumNewsCrawler(Crawler):
 
@@ -93,7 +93,7 @@ class DaumNewsCrawler(Crawler):
     def crawl(self, page_url):
         log.debug('### crawling target url : {0}'.format(page_url))
 
-        raw_html = ''
+        content_html = ''
 
         try:
             log.info('### Crawler waiting ... wait a moment ... ')
@@ -105,8 +105,23 @@ class DaumNewsCrawler(Crawler):
 
             raw_html = res.text
 
+            soup = BeautifulSoup(raw_html, 'html.parser')
+
+            info_html = soup.find('span', class_='info_view').prettify()
+
+            summary_html = soup.find('div', class_='layer_summary')
+
+            if type(summary_html) is not type(None):
+                summary_html = summary_html.prettify()
+            else:
+                summary_html = ''
+
+            main_html = soup.find('div', class_='news_view').prettify()
+
+            content_html = info_html + summary_html + main_html
+
         except Exception as e:
             log.error(get_pretty_traceback())
 
         finally:
-            return raw_html
+            return content_html
