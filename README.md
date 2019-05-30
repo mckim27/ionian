@@ -79,6 +79,8 @@ daum_news_topic_name: daum_news_info
 ___
 
 ### **TODO**
-- docker 로 실행시 aws 관련 설정 입력값이 아닌 mount path 방식으로 변경하기.
 - 기사 본문 scraping 기능 아예 없애진 말고 선택적으로 사용할 수 있도록 구조 변경하기. 
 - Daum news html 템플릿 validation test code 추가하기.
+- Docker 구동시 mount guide ( compose 나 k8s templete guide 제공 )
+    - docker 로 실행시 aws 관련 설정값 
+    - ionian config_xxx.yml 파일
