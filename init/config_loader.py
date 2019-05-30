@@ -25,7 +25,7 @@ class ConfigLoader():
         home = str(Path.home())
         target_path = home + '/.aws'
 
-        if aws_region is None or aws_access_key_id is None or aws_secret_access_key is None:
+        if not aws_region or not aws_access_key_id  or not aws_secret_access_key:
             logger.warn('### There is a empty value among aws_config inputs')
             logger.warn('### The dynamo_store feature is disabled ...')
 
