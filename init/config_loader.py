@@ -67,6 +67,10 @@ class ConfigLoader():
 
             logger.info("### config loadFilePath : {}".format(load_file_path))
             logger.info("### CONFIG ###")
+
+            constant.CONFIG['news_raw_contents_stream_enable'] = \
+                bool(constant.CONFIG['news_raw_contents_stream_enable'])
+            
             logger.info(constant.CONFIG)
 
         except Exception as e:
