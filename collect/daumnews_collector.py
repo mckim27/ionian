@@ -110,7 +110,7 @@ class DaumNewsCollector(Collector):
 
                         for news in news_list:
                             self.publish_message(
-                                constant.CONFIG['daum_news_topic_name'],
+                                constant.CONFIG['news_topic_name'],
                                 news['origin_create_date'],
                                 news
                             )

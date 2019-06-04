@@ -40,7 +40,7 @@ class DaumNewsCrawler(Crawler):
     def waiting_and_crawling(self):
         # consumer 연결 한번으로 변경.
         consumer = KafkaConsumer(
-            constant.CONFIG['daum_news_topic_name'],
+            constant.CONFIG['news_topic_name'],
             auto_offset_reset='latest', group_id='daum_news',
             bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
             consumer_timeout_ms=5000, max_poll_records=10
@@ -57,7 +57,6 @@ class DaumNewsCrawler(Crawler):
                 for msg in consumer:
                     news_info = json.loads(msg.value)
 
-                    news_info['site_name'] = 'daum'
                     # print(news_info)
                     news_info['contents'] = self.crawl(news_info['url'])
 

@@ -10,4 +10,5 @@ consumer_waiting_term_seconds: 5
 crawler_waiting_term_seconds: 1
 db_writer_size: 20
 data_root_path: ./data/raw/text
-daum_news_topic_name: daum_news_info
+news_topic_name: news_info
+news_raw_contents_topic_name: news_raw_contents
