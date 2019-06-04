@@ -57,6 +57,7 @@ class DaumNewsCrawler(Crawler):
                 for msg in consumer:
                     news_info = json.loads(msg.value)
 
+                    news_info['site_name'] = 'daum'
                     # print(news_info)
                     news_info['contents'] = self.crawl(news_info['url'])
 
@@ -68,7 +69,7 @@ class DaumNewsCrawler(Crawler):
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
-                        self.__meta_info_storer.store(news_meta_info_list, 'daum')
+                        self.__meta_info_storer.store(news_meta_info_list)
                         news_meta_info_list = []
                         item_count = 0
                     else:
