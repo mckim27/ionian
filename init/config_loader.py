@@ -25,18 +25,16 @@ class ConfigLoader():
         home = str(Path.home())
         target_path = home + '/.aws'
 
-        if not aws_region or not aws_access_key_id  or not aws_secret_access_key:
+        if os.path.exists(target_path):
+            logger.info('### aws_config exist ... config setting is passed. ')
+            constant.CONFIG['aws_enable'] = True
+
+        elif not aws_region or not aws_access_key_id  or not aws_secret_access_key:
             logger.warn('### There is a empty value among aws_config inputs')
             logger.warn('### The dynamo_store feature is disabled ...')
 
             constant.CONFIG['aws_enable'] = False
-
-        elif os.path.exists(target_path):
-            logger.info('### aws_config exist ... config setting is passed. ')
-            constant.CONFIG['aws_enable'] = True
         else:
-            constant.CONFIG['aws_enable'] = True
-
             os.mkdir(target_path)
             with open(target_path + '/config', mode='wt', encoding='utf-8') as f:
                 f.write(
@@ -54,6 +52,8 @@ class ConfigLoader():
 
             os.chmod(target_path + '/credentials', 0o600)
 
+            constant.CONFIG['aws_enable'] = True
+
             logger.info('### aws_config setting is complete !!')
 
     def load_ionian_config(self) :
@@ -70,7 +70,7 @@ class ConfigLoader():
 
             constant.CONFIG['news_raw_contents_stream_enable'] = \
                 bool(constant.CONFIG['news_raw_contents_stream_enable'])
-            
+
             logger.info(constant.CONFIG)
 
         except Exception as e:
