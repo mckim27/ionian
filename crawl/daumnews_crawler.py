@@ -12,10 +12,12 @@ from init.constant import ERROR_UNEXPECTED_EXIT_CODE
 from utils.etc import get_pretty_traceback
 from store.news_textfile_storer import DaumNewsTextFileStorer
 from store.dynamo_storer import DynamoNewsMetaInfoStorer
+from store.kafka_producer import IonianKafkaProducer
 from sys import exit
 from crawl.crawler import Crawler
 from utils.text_util import is_empty_text, is_short_text, assert_str_default
 from bs4 import BeautifulSoup
+
 
 class DaumNewsCrawler(Crawler):
 
@@ -23,9 +25,18 @@ class DaumNewsCrawler(Crawler):
         self.__text_storer = DaumNewsTextFileStorer()
         self.__meta_info_storer = DynamoNewsMetaInfoStorer()
 
+        if constant.CONFIG['news_raw_contents_stream_enable']:
+            self.__producer = IonianKafkaProducer()
+        else:
+            self.__producer = None
+
     # override
     def stop(self):
         log.info('### Daum News Crawler stopping ...')
+
+        if self.__producer is not None:
+            self.__producer.close()
+
         exit()
 
     # text data validation 필요함.
@@ -41,7 +52,7 @@ class DaumNewsCrawler(Crawler):
         # consumer 연결 한번으로 변경.
         consumer = KafkaConsumer(
             constant.CONFIG['news_topic_name'],
-            auto_offset_reset='latest', group_id='daum_news',
+            auto_offset_reset='latest', group_id='daum_news_info_consumer',
             bootstrap_servers=constant.CONFIG['kafka_brokers'], api_version=(0, 10),
             consumer_timeout_ms=5000, max_poll_records=10
         )
@@ -66,6 +77,9 @@ class DaumNewsCrawler(Crawler):
                         news_meta_info_list.append(news_info)
                         item_count += 1
 
+                        self.__produce_news_raw_content(
+                            news_info['origin_create_date'], news_info['contents'])
+
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
                         self.__meta_info_storer.store(news_meta_info_list)
@@ -75,7 +89,7 @@ class DaumNewsCrawler(Crawler):
                         log.debug('### item_count : {0}'.format(item_count))
 
                 if len(news_meta_info_list) != 0:
-                    self.__meta_info_storer.store(news_meta_info_list, 'daum')
+                    self.__meta_info_storer.store(news_meta_info_list)
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
@@ -125,3 +139,13 @@ class DaumNewsCrawler(Crawler):
 
         finally:
             return content_html
+
+    def __produce_news_raw_content(self, origin_create_date, raw_contents):
+        if self.__producer is None:
+            return
+
+        self.__producer.publish_message(
+            constant.CONFIG['news_raw_contents_topic_name'],
+            origin_create_date,
+            raw_contents
+        )
