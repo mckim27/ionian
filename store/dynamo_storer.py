@@ -18,7 +18,7 @@ class DynamoNewsMetaInfoStorer :
         else:
             log.warn('### You can not use the dynamo store feature ....')
             
-    def store(self, news_info_list, site_name):
+    def store(self, news_info_list):
 
         if self.__table is None:
             log.warn('### nothing to do ...')
@@ -38,7 +38,7 @@ class DynamoNewsMetaInfoStorer :
                         'sub_category_name': news_info['sub_category_name'],
                         'sub_category_en_name': news_info['sub_category_en_name'],
                         'create_date': datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'),
-                        'site_name' : site_name
+                        'site_name' : news_info['site_name']
                     }
                 )
 
