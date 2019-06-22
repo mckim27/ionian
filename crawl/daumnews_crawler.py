@@ -78,7 +78,7 @@ class DaumNewsCrawler(Crawler):
                         item_count += 1
 
                         self.__produce_news_raw_content(
-                            news_info['origin_create_date'], news_info['contents'])
+                            news_info['origin_create_date'], news_info)
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
@@ -140,12 +140,12 @@ class DaumNewsCrawler(Crawler):
         finally:
             return content_html
 
-    def __produce_news_raw_content(self, origin_create_date, raw_contents):
+    def __produce_news_raw_content(self, origin_create_date, news_info):
         if self.__producer is None:
             return
 
         self.__producer.publish_message(
             constant.CONFIG['news_raw_contents_topic_name'],
             origin_create_date,
-            raw_contents
+            news_info
         )
