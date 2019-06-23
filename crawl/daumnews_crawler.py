@@ -78,7 +78,7 @@ class DaumNewsCrawler(Crawler):
                         item_count += 1
 
                         self.__produce_news_raw_content(
-                            news_info['origin_create_date'], news_info)
+                            news_info['origin_create_date'], json.dumps(news_info))
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
