@@ -3,6 +3,7 @@
 
 import time
 import json
+from python_pachyderm import PfsClient
 from logzero import logger as log
 from kafka import KafkaConsumer
 import requests
@@ -15,9 +16,9 @@ from store.dynamo_storer import DynamoNewsMetaInfoStorer
 from store.kafka_producer import IonianKafkaProducer
 from sys import exit
 from crawl.crawler import Crawler
-from utils.text_util import is_empty_text, is_short_text, assert_str_default
+from utils.text_util import is_empty_text, make_pachd_daumnews_dir_name, assert_str_default
 from bs4 import BeautifulSoup
-
+from store.pachd_client import PachdRepoStorer
 
 class DaumNewsCrawler(Crawler):
 
@@ -57,6 +58,8 @@ class DaumNewsCrawler(Crawler):
             consumer_timeout_ms=5000, max_poll_records=10
         )
 
+        pachd_storer = PachdRepoStorer('daum-news-html')
+
         try:
             while True:
                 log.info('### Consumer is waiting ...')
@@ -66,6 +69,8 @@ class DaumNewsCrawler(Crawler):
 
                 item_count = 0
                 for msg in consumer:
+
+
                     news_info = json.loads(msg.value)
 
                     # print(news_info)
@@ -77,19 +82,26 @@ class DaumNewsCrawler(Crawler):
                         news_meta_info_list.append(news_info)
                         item_count += 1
 
-                        self.__produce_news_raw_content(
-                            news_info['origin_create_date'], json.dumps(news_info))
+                        # self.__produce_news_raw_content(
+                        #     news_info['origin_create_date'], json.dumps(news_info))
+
+                        pachd_file_path = \
+                            make_pachd_daumnews_dir_name(news_info) + '/' + news_info['origin_create_date'] + '.html'
+
+                        pachd_storer.put_file_str(pachd_file_path, news_info['contents'])
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
                         self.__meta_info_storer.store(news_meta_info_list)
                         news_meta_info_list = []
                         item_count = 0
+                        pachd_storer.commit()
                     else:
                         log.debug('### item_count : {0}'.format(item_count))
 
                 if len(news_meta_info_list) != 0:
                     self.__meta_info_storer.store(news_meta_info_list)
+                    pachd_storer.commit()
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
