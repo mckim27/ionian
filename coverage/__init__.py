@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __name__            = 'Ionian News Crawler'
-__version__         = '2.1.1'
-__author__          = 'mckim',
+__version__         = '2.2.0'
+__author__          = 'mckim'
 __author_email__    = 'bluevoice27@gmail.com'
 __description__     = 'Korean News Crawler'
 __license__         = 'Apache License 2.0'
