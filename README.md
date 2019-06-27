@@ -4,7 +4,8 @@ Korean News Crawler
 
 ![Code Language](https://img.shields.io/badge/python-3.6-blue.svg) ![Window Supported](https://img.shields.io/badge/windows-not%20supported-red.svg) ![build](https://img.shields.io/circleci/token/YOURTOKEN/project/github/RedSparr0w/node-csgo-parser/master.svg)
    
-![ex_screenshot](./img/ionian_1.png)___
+![ex_screenshot](./img/ionian_1.png)
+___
 ### **Requirements**
 
 - Apache Kafka 2.2
