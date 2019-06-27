@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import traceback
 from coverage import __version__
 from exception.custom_exception import *
 from logzero import logger as log
@@ -61,15 +62,15 @@ if __name__ == "__main__" :
             parser.waiting_and_crawling()
 
     except CannotRunException as cre:
-        log.error(get_pretty_traceback())
+        log.error(traceback.format_exc())
         cre.exit()
 
     except CollectorException as ce:
-        log.error(get_pretty_traceback())
+        log.error(traceback.format_exc())
         ce.exit()
 
     except Exception as e:
-        log.error('Main Error Unexpected Exception... e : {0}'.format(get_pretty_traceback()))
+        log.error('Main Error Unexpected Exception... e : {0}'.format(traceback.format_exc()))
         exit(ERROR_UNEXPECTED_EXIT_CODE)
 
 

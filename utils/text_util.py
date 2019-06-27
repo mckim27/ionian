@@ -37,5 +37,22 @@ def is_empty_text(text):
         return False
 
 
+def make_pachd_daumnews_dir_name(news_info: dict) -> str:
+    result = ''
+
+    ymd_date = news_info['origin_create_date']
+    ymd_date = ymd_date[:8]
+
+    category = news_info['category_en_name']
+
+    result += ymd_date + '/' + category
+
+    if news_info['sub_category_en_name'] != '-':
+        result += '_' + news_info['sub_category_en_name']
+
+    return result
+
+
+
 
 

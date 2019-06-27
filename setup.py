@@ -20,6 +20,7 @@ REQUESTS_MIN_VERSION = '2.21'
 BOTO3_MIN_VERSION = '1.9'
 KAFKA_PYTHON_MIN_VERSION = '1.4'
 URL_LIB3_MIN_VERSION = '1.23'
+# PAPACHY_MIN_VERSION = '1.9.0'
 
 # This check and everything above must remain compatible with python 2.X.
 ##########################################################################
@@ -41,7 +42,8 @@ REQUIREMENTS = [
     'requests>={0}'.format(REQUESTS_MIN_VERSION),
     'kafka-python>={0}'.format(KAFKA_PYTHON_MIN_VERSION),
     'boto3=={0}'.format(BOTO3_MIN_VERSION),
-    'urllib3=={0}'.format(URL_LIB3_MIN_VERSION)
+    'urllib3=={0}'.format(URL_LIB3_MIN_VERSION),
+    # 'python-pachyderm>={0}'.forrmat(PAPACHY_MIN_VERSION)
 ]
 
 setup(
