@@ -8,6 +8,7 @@ ___
 ### **Requirements**
 
 - Apache Kafka 2.2
+- Pachyderm 1.8.7
 
 ___
 ### **Installation**
