@@ -8,10 +8,12 @@ from exception.custom_exception import *
 from logzero import logger as log
 from init.config_loader import ConfigLoader
 from init.constant import *
-from utils.etc import get_pretty_traceback
+from utils.info_util import print_app_info
 from init.factory import CollectorFactory, CrawlerFactory
 
 if __name__ == "__main__" :
+    print_app_info()
+
     try:
         parser = argparse.ArgumentParser(description='news crawler.')
         parser.add_argument('--target', type=str, nargs='?', default='daum',
