@@ -70,7 +70,6 @@ class DaumNewsCrawler(Crawler):
                 item_count = 0
                 for msg in consumer:
 
-
                     news_info = json.loads(msg.value)
 
                     # print(news_info)

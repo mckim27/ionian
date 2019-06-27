@@ -24,10 +24,20 @@ class PachdRepoStorer:
         if self.__commit_id is None:
             self.__commit_id = self.__client.start_commit(self.__repo_name, self.__branch)
 
-        log.info('pachd put-file path : {}'.format(file_path))
+        try:
+            log.info('pachd put-file path : {}'.format(file_path))
 
-        self.__client.put_file_bytes(self.__commit_id, file_path, data.encode('utf-8'))
+            self.__client.put_file_bytes(self.__commit_id, file_path, data.encode('utf-8'))
+        except Exception as e:
+            self.__client.delete_commit(self.__commit_id)
+            raise e
 
     def commit(self):
-        self.__client.finish_commit(self.__commit_id)
-        self.__commit_id = None
+        try:
+            self.__client.finish_commit(self.__commit_id)
+            log.info('finish pachd commit. commit_id : {}'.format(self.__commit_id))
+        except Exception as e:
+            self.__client.delete_commit(self.__commit_id)
+            raise e
+        finally:
+            self.__commit_id = None
