@@ -24,6 +24,11 @@ ___
  ```bash
 $(py3.6 env) python setup.py install 
 ``` 
+
+___
+### **Description**
+- Data Flow
+   - collect url -> Kafka stream -> crawl html -> store file to hdfs (hdfs nfs gateway), put html file in the pachyderm pipeline
 ___
 ### **Feature**
 - 기능 구현된 target site
@@ -35,7 +40,8 @@ ___
 
 #### Crawler
 - Kafka Consumer
-- news html 로컬에 저장.
+- news html 을 hdfs 에 저장.
+- pachyderm pipeline 에 news html 저장.
 - news meta info Dynamo DB 에 저장. 
   ( 별도의 입력값이나 세팅 필요 )
       
@@ -69,18 +75,16 @@ kafka_brokers:
   - 192.168.0.31:9092
   - 192.168.0.32:9092
   - 192.168.0.33:9092
+collector_waiting_term_seconds: 2
 consumer_waiting_term_seconds: 5
 crawler_waiting_term_seconds: 1
-db_writer_size: 20
+db_writer_size: 30
 data_root_path: ./data/raw/text
-daum_news_topic_name: daum_news_info
+news_topic_name: news_info
+news_raw_contents_topic_name: news_raw_contents
+news_raw_contents_stream_enable: True
+pachd_host: 192.168.0.33
+pachd_port: 30650
 ```
 
 ___
-
-### **TODO**
-- 기사 본문 scraping 기능 아예 없애진 말고 선택적으로 사용할 수 있도록 구조 변경하기. 
-- Daum news html 템플릿 validation test code 추가하기.
-- Docker 구동시 mount guide ( compose 나 k8s templete guide 제공 )
-    - docker 로 실행시 aws 관련 설정값 
-    - ionian config_xxx.yml 파일
