@@ -63,7 +63,7 @@ class DaumNewsCrawler(Crawler):
         try:
             while True:
                 log.info('### Consumer is waiting ...')
-                time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
+                #time.sleep(constant.CONFIG['consumer_waiting_term_seconds'])
 
                 news_meta_info_list = []
 
@@ -88,6 +88,7 @@ class DaumNewsCrawler(Crawler):
                             make_pachd_daumnews_dir_name(news_info) + '/' + news_info['origin_create_date'] + '.html'
 
                         pachd_storer.put_file_str(pachd_file_path, news_info['contents'])
+                        # pachd_storer.put_file_atomic(pachd_file_path, news_info['contents'])
 
                     # 특정 갯수가 되면 dynamo db 에 insert
                     if item_count >= constant.CONFIG['db_writer_size']:
@@ -95,12 +96,14 @@ class DaumNewsCrawler(Crawler):
                         news_meta_info_list = []
                         item_count = 0
                         pachd_storer.commit()
+                        pachd_storer.reset()
                     else:
                         log.debug('### item_count : {0}'.format(item_count))
 
                 if len(news_meta_info_list) != 0:
                     self.__meta_info_storer.store(news_meta_info_list)
                     pachd_storer.commit()
+                    pachd_storer.reset()
 
         except KeyboardInterrupt:
             # stop 으로 exit 호출되어도 sys.exit 이기에 finally 동작.
