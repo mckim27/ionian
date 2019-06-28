@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __name__            = 'Ionian News Crawler'
-__version__         = '2.2.1-2'
+__version__         = '2.2.1-3'
 __author__          = 'mckim'
 __author_email__    = 'bluevoice27@gmail.com'
 __description__     = 'Korean News Crawler'
