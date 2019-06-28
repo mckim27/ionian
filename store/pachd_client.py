@@ -3,6 +3,8 @@
 
 import traceback
 import python_pachyderm
+import time
+import sys
 from init import constant
 from logzero import logger as log
 
@@ -10,11 +12,11 @@ from logzero import logger as log
 class PachdRepoStorer:
 
     __client = None
-    __commit_id = None
+    __commit = None
     __repo_name = None
     __branch = None
-    __is_complete = False
     __file_list = []
+    __pre_commit_id = None
 
     def __init__(self, repo_name, branch: str = 'master'):
         self.__client = python_pachyderm.PfsClient(
@@ -31,33 +33,65 @@ class PachdRepoStorer:
 
         self.__file_list.append(pachd_data)
 
-    def commit(self, retry_count: int = 0):
+    def reset(self):
+        self.__commit = None
+        self.__file_list.clear()
+
+    def put_file_atomic(self, file_path, contents: str):
+
+        pachd_data = {
+            'file_path': file_path,
+            'contents': contents
+        }
+
         try:
-            self.__commit_id = self.__client.start_commit(self.__repo_name, self.__branch)
+            self.__commit = self.__client.start_commit(
+                self.__repo_name, self.__branch, parent=self.__pre_commit_id)
 
-            for pachd_data in self.__file_list:
-                self.__client.put_file_bytes(
-                    self.__commit_id, pachd_data['file_path'], pachd_data['contents'].encode('utf-8')
-                )
+            self.__client.put_file_bytes(
+                self.__commit, pachd_data['file_path'], pachd_data['contents'].encode('utf-8')
+            )
 
-            self.__client.finish_commit(self.__commit_id)
+            self.__client.finish_commit(self.__commit)
+            log.info('finish pachd commit. commit_id : {}'.format(self.__commit.id))
 
-            log.info('finish pachd commit. commit_id : {}'.format(self.__commit_id))
-            self.__is_complete = True
+            self.__pre_commit_id = self.__commit.id
+
+            self.__commit = None
 
         except Exception as e:
-            log.error(traceback.format_exc())
+            if 'has not been finished' in traceback.format_exc():
+                log.warn('the parent commit has not been finished. wait a moment ...')
+                time.sleep(5)
 
-            self.__client.delete_commit(self.__commit_id)
-
-            if retry_count < 3:
-                self.commit(retry_count + 1)
+                self.put_file_atomic(file_path, contents)
             else:
-                is_complete = True
                 raise e
-            
-        finally:
-            if self.__is_complete:
-                self.__commit_id = None
-                self.__file_list.clear()
-                self.__is_complete = False
+
+    def commit(self):
+        try:
+            self.__commit = self.__client.start_commit(
+                self.__repo_name, self.__branch, parent=self.__pre_commit_id)
+
+            log.info('start pfs commit !! commit id : {}'.format(self.__commit.id))
+
+            for idx, pachd_data in enumerate(self.__file_list):
+                self.__client.put_file_bytes(
+                    self.__commit, pachd_data['file_path'], pachd_data['contents'].encode('utf-8')
+                )
+                log.info('seq : {}, put file success. file : {}'.format(idx + 1, pachd_data['file_path']))
+
+            self.__client.finish_commit(self.__commit)
+
+            log.info('finish pfs commit. commit_id : {}'.format(self.__commit.id))
+
+            self.__pre_commit_id = self.__commit.id
+
+        except Exception as e:
+            if 'has not been finished' in traceback.format_exc():
+                log.warn('the parent commit has not been finished. wait a moment ...')
+                time.sleep(5)
+
+                self.commit()
+            else:
+                raise e
